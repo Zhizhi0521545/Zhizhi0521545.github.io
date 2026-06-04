@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>梅元知 · 画意集</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 深紫黑渐变背景 */
+        body {
+            background: linear-gradient(145deg, #140b1f 0%, #1c122e 50%, #0e0718 100%);
+            font-family: 'Segoe UI', '华文楷书', 'Microsoft YaHei', serif;
+            color: #e0d4f0;
+            min-height: 100vh;
+        }
+
+        .back-bar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: rgba(20, 15, 30, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(150, 110, 200, 0.4);
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: #e0d4f0;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #5a3a8a;
+            border-color: #c58aff;
+            color: white;
+            transform: translateX(-3px);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+            background: transparent;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            font-family: '华文楷书', 'KaiTi', serif;
+            letter-spacing: 8px;
+            color: #e8daff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            color: #c8b0e8;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .gallery {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .painting-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .painting-card {
+            background: rgba(20, 15, 30, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(150, 110, 200, 0.4);
+        }
+
+        .painting-card:hover {
+            transform: translateY(-6px);
+            background: rgba(30, 22, 50, 0.85);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4);
+            border-color: #c58aff;
+        }
+
+        .painting-img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            display: block;
+            background: #2a1a3e;
+        }
+
+        .painting-info {
+            padding: 0.8rem 1rem 1rem;
+        }
+
+        .painting-info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #f0e6ff;
+            margin-bottom: 0.2rem;
+        }
+
+        .painting-info p {
+            font-size: 0.75rem;
+            color: #cdbbf0;
+            line-height: 1.4;
+        }
+
+        .painting-author {
+            font-size: 0.7rem;
+            margin-top: 0.4rem;
+            color: #b89ad6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .painting-author a {
+            color: #e2caff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .painting-author a:hover {
+            text-decoration: underline;
+            color: white;
+        }
+
+        /* 致谢和投稿区域 */
+        .author-credit {
+            max-width: 1200px;
+            margin: 2rem auto 2rem;
+            padding: 0 2rem;
+        }
+        .credit-card {
+            background: rgba(30, 22, 50, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 0.8rem 1.2rem;
+            text-align: center;
+            border: 1px solid rgba(197, 138, 255, 0.3);
+        }
+        .credit-card p {
+            color: #d9c8f0;
+            font-size: 0.75rem;
+        }
+        .credit-card strong {
+            color: #e2b8ff;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 2rem;
+            color: #9a7ab5;
+            border-top: 1px solid #3a2a55;
+        }
+
+        /* 悬浮音乐按钮 */
+        .music-float-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(106, 60, 158, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .music-float-btn:hover {
+            transform: scale(1.08);
+            background: #8a49a6;
+            box-shadow: 0 6px 20px rgba(106, 60, 158, 0.5);
+        }
+
+        .music-float-btn i {
+            font-size: 26px;
+            color: white;
+        }
+
+        /* 投稿引导区域 */
+        .submit-guide {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            padding: 0 2rem;
+        }
+        .submit-card {
+            background: rgba(30, 22, 50, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(200, 170, 240, 0.4);
+        }
+        .submit-card i {
+            font-size: 2rem;
+            color: #d8b4ff;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .submit-card h3 {
+            color: #f0e6ff;
+            margin-bottom: 0.5rem;
+        }
+        .submit-card p {
+            color: #cdbbf0;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        .submit-btn {
+            display: inline-block;
+            background: #8e6cb8;
+            color: #fff3e6;
+            padding: 8px 24px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .submit-btn:hover {
+            background: #a07dd0;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 700px) {
+            .painting-grid {
+                gap: 1rem;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            .author-credit {
+                padding: 0 1rem;
+            }
+            .submit-guide {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="back-bar">
+        <a href="tongren.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> 返回同人衍生
+        </a>
+    </div>
+
+    <div class="hero">
+        <h1><i class="fas fa-paintbrush"></i> 画意集 · 灯火为念</h1>
+        <p>「一笔一画，皆是心意」</p>
+    </div>
+
+    <div class="gallery">
+        <div class="painting-grid" id="paintingGrid"></div>
+    </div>
+
+    <!-- 投稿引导 -->
+    <div class="submit-guide">
+        <div class="submit-card">
+            <i class="fas fa-pen-fancy"></i>
+            <h3> 您的作品也想出现在这里？</h3>
+            <p>欢迎投稿梅元知同人作品，审核通过后将在「同人区」展示</p>
+            <a href="tongren.html#guide" class="submit-btn">📮 查看投稿指南</a>
+        </div>
+    </div>
+
+    <!-- 致谢授权画师 -->
+    <div class="author-credit">
+        <div class="credit-card">
+            <p>✨ 致谢：感谢抖音博主 <strong>@一砚清秋</strong>、<strong>@多愁公子剑</strong> 授权使用插画作品</p>
+        </div>
+    </div>
+
+    <footer>
+        <p> 点击卡片跳转原作主页 | 仅供交流与欣赏 </p>
+        <p>⭐ 一笔一墨，皆是天骄风骨 </p>
+    </footer>
+
+    <!-- 悬浮音乐按钮 -->
+    <div class="music-float-btn" onclick="window.open('https://www.bilibili.com/video/BV1AcAhesEPG/', '_blank')">
+        <i class="fas fa-music"></i>
+    </div>
+
+    <script>
+        const paintings = [
+            {
+                url: "image/shoulu3.jpg",
+                title: "梅元知 · 新造型",
+                author: "抖音：一砚清秋",
+                link: "https://v.douyin.com/XKJUA--i16E/"
+            },
+            {
+                url: "image/shoulu1.jpg",
+                title: "凑七合成神尊",
+                author: "抖音：多愁公子剑",
+                link: "https://v.douyin.com/3u0PU3djask/"
+            },
+            {
+                url: "image/shoulu2.jpg",
+                title: "穿一下灯灯的衣服",
+                author: "抖音：多愁公子剑",
+                link: "https://v.douyin.com/Uwd870TPQZo/"
+            },
+            // { url: "image/drink.jpg", title: "举杯饮茶", author: "沧元图动漫", link: "#" },
+            { url: "image/gf9.jpg", title: "剑光凝霜", author: "沧元图动漫", link: "#" },
+            // { url: "yuan1.jpg", title: "焰光起，狐形现", author: "沧元图动漫", link: "#" },
+            // { url: "image/huafu.jpg", title: "印结 符起", author: "沧元图动漫", link: "#" },
+            // { url: "image/guanfang4.jpg", title: "持符施法", author: "沧元图动漫", link: "#" },
+            // { url: "image/duxing.jpg", title: "孤影独行", author: "沧元图动漫", link: "#" }
+        ];
+
+        function renderPaintings() {
+            const grid = document.getElementById('paintingGrid');
+            grid.innerHTML = paintings.map(p => `
+                <div class="painting-card" onclick="window.open('${p.link}', '_blank')">
+                    <img class="painting-img" src="${p.url}" alt="${p.title}" loading="lazy"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'200\\' viewBox=\\'0 0 300 200\\'%3E%3Crect width=\\'300\\' height=\\'200\\' fill=\\'%232a1a3e\\'/%3E%3Ctext x=\\'150\\' y=\\'100\\' text-anchor=\\'middle\\' dy=\\'.3em\\' fill=\\'%239980b3\\'%3E🎨 图片加载中%3C/text%3E%3C/svg%3E'">
+                    <div class="painting-info">
+                        <h3>${p.title}</h3>
+                        <div class="painting-author">
+                            <span> ${p.author}</span>
+                            <span>🔗 查看详情 →</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        renderPaintings();
+    </script>
+</body>
+</html>
