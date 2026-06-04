@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>羁绊关系 · 梅元知 | 众生与他</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            font-family: 'Segoe UI', '华文楷书', 'Microsoft YaHei', sans-serif;
+            color: #e8d9ff;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('image/mengzhi.jpg');
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            filter: brightness(0.65) contrast(1.1);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 统一白色导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(139, 90, 200, 0.15);
+            padding: 0.6rem 2rem;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-logo {
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #6a3c9e, #9b59b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-family: '华文楷书', 'KaiTi', serif;
+        }
+
+        .nav-logo i {
+            background: linear-gradient(135deg, #6a3c9e, #9b59b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-right: 8px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: #4a4a6a;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            border-radius: 24px;
+        }
+
+        .nav-link:hover {
+            background: rgba(106, 60, 158, 0.1);
+            color: #6a3c9e;
+        }
+
+        .nav-link.active {
+            background: #2a1a55;
+            color: #e8d9ff;
+            box-shadow: 0 2px 8px rgba(42, 26, 85, 0.2);
+        }
+
+        .nav-link.active i {
+            color: #c58aff;
+        }
+
+        .nav-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: #4a4a6a;
+            cursor: pointer;
+        }
+
+        @media (max-width: 850px) {
+            .nav-toggle {
+                display: block;
+            }
+            .nav-menu {
+                position: fixed;
+                top: 55px;
+                left: -100%;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                transition: left 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+            .nav-menu.active {
+                left: 0;
+            }
+            .nav-item {
+                width: 100%;
+                text-align: center;
+            }
+            .nav-link {
+                justify-content: center;
+                border-radius: 0;
+                padding: 0.8rem;
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 100px 1.5rem 2.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-header {
+            text-align: center;
+            padding: 1rem 1rem 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #e8d9ff;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+            font-family: '华文楷书', 'KaiTi', serif;
+        }
+
+        .page-header p {
+            color: #d4c4e8;
+            text-shadow: 0 0 10px rgba(0,0,0,0.3);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .bond-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            padding: 1.6rem 2rem;
+            margin-bottom: 1.8rem;
+            border: 2px solid #d4af37;
+            scroll-margin-top: 80px;
+            transition: all 0.2s;
+        }
+
+        .bond-card:hover {
+            background: rgba(0, 0, 0, 0.55);
+            border-color: #f0d860;
+            transform: translateX(4px);
+        }
+
+        .bond-header {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+            padding-bottom: 0.5rem;
+        }
+
+        .bond-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e8d9ff;
+            font-family: '华文楷书', 'KaiTi', serif;
+        }
+
+        .bond-relation {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #d4af37;
+            border-radius: 30px;
+            padding: 0.2rem 0.9rem;
+            font-size: 0.8rem;
+            color: #f0d860;
+        }
+
+        .bond-desc {
+            margin: 1rem 0;
+            line-height: 1.7;
+            color: #e0d4ff;
+            font-size: 0.95rem;
+        }
+
+        .bond-quote {
+            background: rgba(212, 175, 55, 0.08);
+            border-left: 4px solid #d4af37;
+            padding: 0.7rem 1.2rem;
+            margin-top: 1rem;
+            font-style: italic;
+            color: #f2e6ff;
+            border-radius: 0 16px 16px 0;
+        }
+
+        .bond-quote i {
+            color: #d4af37;
+            margin-right: 6px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 1.5rem;
+            color: #c58aff;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: #e8d9ff;
+            transform: translateX(-5px);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            margin-top: 2.5rem;
+            border-top: 1px solid rgba(197, 138, 255, 0.2);
+            padding-top: 2rem;
+            color: rgba(232, 217, 255, 0.6);
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                padding: 80px 1rem 2rem;
+            }
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            .bond-name {
+                font-size: 1.4rem;
+            }
+            .bond-card {
+                padding: 1.2rem;
+            }
+        }
+        /* ========== 移动端适配 (针对手机浏览器优化) ========== */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+    .nav-logo {
+        font-size: 1.1rem;
+    }
+    .container {
+        padding: 0 1rem;
+    }
+    .hero {
+        min-height: 60vh;
+        padding: 4rem 1rem 2rem;
+    }
+    .hero h1 {
+        font-size: 2.2rem;
+        letter-spacing: 4px;
+    }
+    .hero-sub {
+        font-size: 0.8rem;
+        padding: 0.3rem 1rem;
+        letter-spacing: 2px;
+    }
+    .hero-quote {
+        font-size: 0.75rem;
+        margin: 0 1rem 1.5rem;
+    }
+    .scroll-hint {
+        margin-top: 2rem;
+    }
+    .scroll-hint i {
+        font-size: 1.4rem;
+    }
+    .section {
+        padding: 2.5rem 0;
+    }
+    .section-title {
+        font-size: 1.4rem;
+        margin-bottom: 1.2rem;
+    }
+    .preview-card {
+        padding: 1rem;
+    }
+    .profile-highlight {
+        gap: 1rem;
+    }
+    .profile-text p {
+        font-size: 0.85rem;
+    }
+    .profile-tags {
+        gap: 0.5rem;
+    }
+    .profile-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.8rem;
+    }
+    .preview-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+    }
+    .bond-preview {
+        gap: 0.8rem;
+    }
+    .bond-item {
+        width: 70px;
+    }
+    .bond-icon {
+        width: 55px;
+        height: 55px;
+    }
+    .bond-icon img,
+    .bond-icon div {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .bond-name {
+        font-size: 0.7rem;
+    }
+    .bond-rel {
+        font-size: 0.6rem;
+    }
+    .tongren-grid {
+        gap: 0.8rem;
+    }
+    .tongren-card {
+        padding: 0.8rem 1rem;
+        flex: 1 1 120px;
+    }
+    .tongren-card i {
+        font-size: 1.5rem;
+    }
+    .tongren-card span {
+        font-size: 0.75rem;
+    }
+    .tongren-card small {
+        font-size: 0.6rem;
+    }
+    footer {
+        font-size: 0.6rem;
+        padding: 1rem;
+    }
+}
+
+/* 更小的手机 (宽度 ≤ 480px) */
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 1.8rem;
+        letter-spacing: 2px;
+    }
+    .hero-sub {
+        font-size: 0.7rem;
+    }
+    .hero-quote {
+        font-size: 0.7rem;
+    }
+    .bond-item {
+        width: 60px;
+    }
+    .bond-icon {
+        width: 48px;
+        height: 48px;
+    }
+    .bond-name {
+        font-size: 0.65rem;
+    }
+    .preview-btn {
+        font-size: 0.7rem;
+    }
+    .tongren-card {
+        flex: 1 1 100px;
+        padding: 0.6rem 0.8rem;
+    }
+    .tongren-card i {
+        font-size: 1.3rem;
+    }
+    .tongren-card span {
+        font-size: 0.7rem;
+    }
+}
+
+/* 360浏览器特殊处理：图片渲染 */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .bond-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-logo"><i class="fas fa-fox"></i> 灯火集</div>
+        <ul class="nav-menu">
+           <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+            <li class="nav-item"><a href="renwu.html" class="nav-link">人物简介</a></li>
+            <li class="nav-item"><a href="zhanli.html" class="nav-link">战力图鉴</a></li>
+            <li class="nav-item"><a href="guanxi.html" class="nav-link active"> 羁绊关系</a></li>
+            <li class="nav-item"><a href="tongren.html" class="nav-link">同人衍生</a></li>
+            <li class="nav-item"><a href="liuyan.html" class="nav-link"></i> 留灯处</a></li>
+            <li class="nav-item"><a href="xinsheng.html" class="nav-link">归途·新生</a></li>
+             <li class="nav-item"><a href="about.html" class="nav-link"></i> 关于</a></li>
+        </ul>
+        <div class="nav-toggle" id="navToggle"><i class="fas fa-bars"></i></div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1> 羁绊 · 众生与他</h1>
+        <p>「他守护过的人，最终都成了他存在过的证明」</p>
+    </div>
+
+    <!-- 孟川 -->
+    <div id="mengchuan" class="bond-card">
+        <div class="bond-header">
+            <span class="bond-name">孟川</span>
+            <span class="bond-relation">知己 · 挚友</span>
+        </div>
+        <div class="bond-desc">
+            东域另一位天骄，与梅元知亦敌亦友，惺惺相惜。两人从最初的对立到相互认可，梅元知从未嫉妒孟川的天赋，反而多次将未竟的信念托付给他。孟川是唯一听到梅元知最后遗言的人，也是他最信任的人。
+        </div>
+        <div class="bond-quote">
+            <i class="fas fa-quote-left"></i> “孟川，我有种预感，你能结束这吃人的世道。”<br>
+            <i class="fas fa-quote-left"></i> “孟师弟，和你一起踢球，很开心。”
+        </div>
+    </div>
+
+    <!-- 一枝梅 -->
+    <div id="yimei" class="bond-card">
+        <div class="bond-header">
+            <span class="bond-name">一枝梅</span>
+            <span class="bond-relation">紫狐伙伴</span>
+        </div>
+        <div class="bond-desc">
+            梅元知的紫狐伙伴，名字取自“墙角数枝梅，凌寒独自开”，象征梅元知孤傲不屈的品格。它伴随梅元知修炼，是他为数不多可以放下戒备的对象。离别时，梅元知将它留在玉阳宫，不愿让它随自己去边关受苦。
+        </div>
+        <div class="bond-quote">
+            <i class="fas fa-quote-left"></i> “一枝梅，你就好好留在玉阳宫吧，跟着我去边关只会受苦的。”
+        </div>
+    </div>
+
+    <!-- 李淮南 -->
+    <div id="lihuainan" class="bond-card">
+        <div class="bond-header">
+            <span class="bond-name">李淮南</span>
+            <span class="bond-relation">师徒 · 背叛者</span>
+        </div>
+        <div class="bond-desc">
+            玉阳宫主，梅元知的师父。表面器重，实则将梅元知作为试验品，在他体内植入妖族血脉。最终被梅元知当面对质，师徒之情彻底碎裂。
+        </div>
+        <div class="bond-quote">
+            <i class="fas fa-quote-left"></i> “可想一网打尽天妖门就可以拿无辜的人做诱饵吗？让他们成为天妖门的猎物，成为师傅您手中的牺牲品，让他们不明不白地死去，这样又何其不公平！”
+        </div>
+    </div>
+
+    <!-- 晏烬 -->
+    <div id="yanjin" class="bond-card">
+        <div class="bond-header">
+            <span class="bond-name">晏烬</span>
+            <span class="bond-relation">师兄弟</span>
+        </div>
+        <div class="bond-desc">
+            玉阳宫同门师弟。梅元知在斩妖大会上曾阻止孟川对他补刀，体现梅元知“斩妖不斩人”的原则。即便晏烬曾做错事，梅元知依然坚持公平与善良。
+        </div>
+        <div class="bond-quote">
+            <i class="fas fa-quote-left"></i> “斩妖大会是斩妖，而非斩人。”
+        </div>
+    </div>
+
+    <!-- 清风（新增） -->
+    <div id="qingfeng" class="bond-card">
+        <div class="bond-header">
+            <span class="bond-name">清风</span>
+            <span class="bond-relation">师兄弟 · 棋子</span>
+        </div>
+        <div class="bond-desc">
+            玉阳宫主门下弟子，梅元知的同门师弟。在斩妖大会上，他奉命故意将伪装成人类的妖族放入阵中，导致许多无辜修士成为牺牲品。他如同师父手中的一枚棋子，身不由己地参与了这场不公的交易。
+        </div>
+        <div class="bond-quote">
+            <i class="fas fa-quote-left"></i> 玉阳宫主让门下弟子清风，故意把假扮为人族的妖都给放进去。
+        </div>
+    </div>
+
+    <!-- 蜘蛛妖后 -->
+    <div id="zhizhu" class="bond-card">
+        <div class="bond-header">
+            <span class="bond-name">蜘蛛妖后</span>
+            <span class="bond-relation">约定 · 暗算者</span>
+        </div>
+        <div class="bond-desc">
+            因信守与蜘蛛妖后的约定，梅元知被偷袭，导致失去一臂一腿，神尊之路断绝。这是他人生的转折点，也是他“残躯斩妖”的开始。蜘蛛妖子后来附身梅元知，使他被迫请求孟川结束自己的生命。
+        </div>
+        <div class="bond-quote">
+            <i class="fas fa-quote-left"></i> “你说你要斩尽天下妖，而如今，妖就在你眼前，杀了他吧。”
+        </div>
+    </div>
+
+   
+
+    <a href="renwu.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回人物简介</a>
+
+    <footer>
+         九尾燃灯 · 众生是他存在的证明 <br>
+       
+    </footer>
+</div>
+
+<script>
+    const navToggle = document.getElementById('navToggle');
+    const navMenu = document.querySelector('.nav-menu');
+    if (navToggle) {
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    }
+
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+            link.classList.add('active');
+        }
+    });
+
+    function handleAnchorScroll() {
+        const id = window.location.hash.slice(1);
+        if (id) {
+            const element = document.getElementById(id);
+            if (element) {
+                setTimeout(() => {
+                    const offset = 80;
+                    const y = element.getBoundingClientRect().top + window.scrollY - offset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }, 100);
+            }
+        }
+    }
+
+    window.addEventListener('hashchange', handleAnchorScroll);
+    if (window.location.hash) {
+        handleAnchorScroll();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>剪辑作品 · 梅元知</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0e;
+            font-family: 'Segoe UI', '华文楷书', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            color: #e8d9ff;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 10%, #1a0a2e, #0a0a0e);
+            z-index: -2;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 14, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(197, 138, 255, 0.2);
+            padding: 0.8rem 2rem;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-logo {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #e8d9ff;
+            font-family: '华文楷书', 'KaiTi', serif;
+            letter-spacing: 2px;
+        }
+
+        .nav-logo i {
+            color: #c58aff;
+            margin-right: 6px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: #a0a0b0;
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            transition: 0.2s;
+            border-radius: 20px;
+        }
+
+        .nav-link:hover {
+            color: #e8d9ff;
+            background: rgba(197, 138, 255, 0.15);
+        }
+
+        .nav-link.active {
+            background: rgba(197, 138, 255, 0.25);
+            color: #e8d9ff;
+        }
+
+        .nav-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: #e8d9ff;
+            cursor: pointer;
+        }
+
+        /* 固定在左上角的返回按钮 */
+        .fixed-return {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            z-index: 1001;
+        }
+
+        .btn-return {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(30, 20, 40, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(100, 70, 150, 0.5);
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: #f0e6ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-return:hover {
+            background: #4a2a6e;
+            border-color: #b87cff;
+            color: white;
+            transform: translateX(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 1.5rem 2.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            color: #f0e6ff;
+            font-family: '华文楷书', 'KaiTi', serif;
+        }
+
+        .page-header p {
+            color: #8a8a9a;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .video-card {
+            background: rgba(20, 15, 35, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(197, 138, 255, 0.25);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(197, 138, 255, 0.6);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .video-cover {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #0a0a12;
+            overflow: hidden;
+        }
+
+        .video-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .video-card:hover .video-cover img {
+            transform: scale(1.05);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-card:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .play-overlay i {
+            font-size: 3rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-info {
+            padding: 0.8rem 1rem;
+        }
+
+        .video-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e8d9ff;
+            margin-bottom: 0.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-source {
+            font-size: 0.7rem;
+            color: #a0a0b0;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            background: rgba(197, 138, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 20px;
+            color: #c58aff;
+        }
+
+        .credit-box {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .credit-box p {
+            font-size: 0.7rem;
+            color: #a0a0b0;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.65rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            color: #6a6a7a;
+            border-top: 1px solid rgba(197, 138, 255, 0.15);
+        }
+
+        @media (max-width: 700px) {
+            .fixed-return {
+                top: 70px;
+                left: 12px;
+            }
+            .btn-return {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .nav-toggle {
+                display: block;
+            }
+            .nav-menu {
+                position: fixed;
+                top: 55px;
+                left: -100%;
+                width: 100%;
+                background: rgba(10, 10, 14, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                align-items: center;
+                padding: 1rem 0;
+                transition: left 0.3s ease;
+            }
+            .nav-menu.active {
+                left: 0;
+            }
+            .nav-item {
+                width: 100%;
+                text-align: center;
+            }
+            .nav-link {
+                padding: 0.6rem;
+                display: inline-block;
+            }
+            .container {
+                padding: 80px 1rem 2rem;
+            }
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 固定在左上角的返回按钮 -->
+<div class="fixed-return">
+    <a href="tongren.html" class="btn-return">
+        <i class="fas fa-arrow-left"></i> 返回同人衍生
+    </a>
+</div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-logo"><i class="fas fa-fox"></i> 灯火集</div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+            <li class="nav-item"><a href="renwu.html" class="nav-link">人物简介</a></li>
+            <li class="nav-item"><a href="zhanli.html" class="nav-link">战力图鉴</a></li>
+            <li class="nav-item"><a href="guanxi.html" class="nav-link">羁绊关系</a></li>
+            <li class="nav-item"><a href="tongren.html" class="nav-link">同人衍生</a></li>
+            <li class="nav-item"><a href="liuyan.html" class="nav-link">留灯处</a></li>
+            <li class="nav-item"><a href="xinsheng.html" class="nav-link">归途·新生</a></li>
+            <li class="nav-item"><a href="about.html" class="nav-link">关于</a></li>
+        </ul>
+        <div class="nav-toggle" id="navToggle"><i class="fas fa-bars"></i></div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-video"></i> 剪辑作品</h1>
+        <p>「每一帧，都是他曾来过的证明」</p>
+        <p style="font-size: 0.7rem; margin-top: 0.5rem;">🎬 点击卡片跳转官方平台观看高清完整版</p>
+    </div>
+
+    <div class="video-grid" id="videoGrid"></div>
+
+    <div class="credit-box">
+        <p>
+            🎬 感谢「沧元图」官方抖音分享精彩片段<br>
+            🎬 感谢抖音博主@心上秋🇨🇳分享精彩片段<br>
+            🎬 感谢抖音博主@susu分享精彩片段<br>
+            🎬 感谢抖音博主@次灰分享精彩片段<br>
+            🎬 感谢抖音博主@一ke耽丹莓分享精彩片段<br>
+            🎬 感谢抖音博主@钰合成分享精彩片段<br>
+            🎬 感谢抖音博主@桃流分享精彩片段<br>
+             点击卡片即可跳转至官方平台观看原视频，版权归原作者所有
+        </p>
+    </div>
+</div>
+
+<footer>
+     九尾燃灯 · 宿命不改其志 <br>
+    非商业粉丝站点 · 万家灯火，为君长明
+</footer>
+
+<script>
+    // 视频数据 - 官方抖音视频
+    const videos = [
+        // ===== 官方抖音视频 =====
+        {
+            cover: "image/guanfang1.jpg",
+            title: "终于又见面了，小狐狸是不会消失的",
+            source: "沧元图官方抖音",
+            platform: "抖音",
+            url: "https://v.douyin.com/OuS474l4Byk/"
+        },
+        {
+            cover: "image/guanfang2.jpg",
+            title: "好在花有重开日，人有重逢时",
+            source: "沧元图官方抖音",
+            platform: "抖音",
+            url: "https://v.douyin.com/oCIX6FbFWWE/"
+        },
+        {
+            cover: "image/guanfang3.jpg",
+            title: "欢迎回家！我们的老朋友梅元知！",
+            source: "沧元图官方抖音",
+            platform: "抖音",
+            url: "https://v.douyin.com/PTZUPlvVFoQ/"
+        },
+
+        // ===== 授权博主视频 =====
+        {
+            cover: "image/gf17.jpg",
+            title: "梅元知是多少人的意难平",
+            source: "抖音 @心上秋🇨🇳",
+            platform: "抖音",
+            url: "https://v.douyin.com/5jcAgINeXWY/"
+        },
+        {
+            cover: "image/drink.jpg",
+            title: "他不该是这样的结局",
+            source: "抖音 @susu",
+            platform: "抖音",
+            url: "https://v.douyin.com/dvTkjo8Mhk4/"
+        },
+        {
+            cover: "image/guanfang4.jpg",
+            title: "开牌，我要验牌",
+            source: "抖音 @次灰",
+            platform: "抖音",
+            url: "https://v.douyin.com/TB-4JLyhO84/"
+        },
+        {
+            cover: "image/fohuo.jpg",
+            title: "白月光回国，修炼暂停我去接！#梅元知复活",
+            source: "抖音 @一ke耽丹莓",
+            platform: "抖音",
+            url: "https://v.douyin.com/GS1w94xqLGU/"
+        },
+        {
+            cover: "image/tiancai.jpg",
+            title: "百年难一遇的天才，那年的东宁府却...",
+            source: "抖音 @钰合成",
+            platform: "抖音",
+            url: "https://v.douyin.com/_IhMT9VFXRU/"
+        },
+        // ===== 新视频：如何抹去你身影 =====
+        {
+            cover: "image/spfm1.jpg",
+            title: "如何抹去你身影 如同忘却我姓名…",
+            source: "抖音 @桃流",
+            platform: "抖音",
+            url: "https://v.douyin.com/qsTQgonnkVI/"
+        }
+    ];
+
+    function renderVideoGrid() {
+        const grid = document.getElementById('videoGrid');
+        grid.innerHTML = videos.map(video => `
+            <div class="video-card" onclick="window.open('${video.url}', '_blank')">
+                <div class="video-cover">
+                    <img src="${video.cover}" alt="${video.title}" loading="lazy"
+                         onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22320%22%20height%3D%22180%22%20viewBox%3D%220%200%20320%20180%22%3E%3Crect%20width%3D%22320%22%20height%3D%22180%22%20fill%3D%22%23222%22%2F%3E%3Ctext%20x%3D%22160%22%20y%3D%2290%22%20text-anchor%3D%22middle%22%20fill%3D%22%23666%22%3E📹%20封面加载失败%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    <div class="play-overlay">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                </div>
+                <div class="video-info">
+                    <div class="video-title">
+                        <span>${escapeHtml(video.title)}</span>
+                        <span class="badge">${video.platform}</span>
+                    </div>
+                    <div class="video-source">来源：${escapeHtml(video.source)}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // 导航栏
+    const navToggle = document.getElementById('navToggle');
+    const navMenu = document.querySelector('.nav-menu');
+    if (navToggle) {
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    }
+
+    renderVideoGrid();
+</script>
+</body>
+</html>
