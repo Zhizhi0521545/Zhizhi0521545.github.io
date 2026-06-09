@@ -398,7 +398,7 @@ const SUPABASE_KEY = 'sb_publishable_DONsSE_XcQQPTyLzTLaKtQ_p2CX8Gxd';
 
 // 动态加载 Supabase JS（绕过CDN屏蔽）
 const script = document.createElement('script');
-script.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js';
+script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 script.onload = () => {
     window.supabase = supabase;
     window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
