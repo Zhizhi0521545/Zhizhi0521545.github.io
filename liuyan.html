@@ -571,7 +571,15 @@ async function initWeather() {
         const geoRes = await fetch('https://api.ip.sb/geoip');
         const geoData = await geoRes.json();
         
-        let city = geoData.city || '灯火城';
+       let city = geoData.city || '灯火城';
+
+// 只优化济源周边 IP 识别问题（不影响其他人）
+const cityFix = {
+  'Pingdingshan': '济源',
+  'Zhengzhou': '济源',
+  'Luoyang': '济源'
+};
+if (cityFix[city]) city = cityFix[city];
         // 常见英文城市转中文（可选，好看而已）
         const cityMap = {
             'Zhengzhou': '郑州', 'Luoyang': '洛阳', 'Jiyuan': '济源',
