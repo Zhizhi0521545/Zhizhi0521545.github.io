@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>留灯处 · 灯火集｜梅元知</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Supabase SDK 直接加载（不用动态加载了） -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -339,7 +341,7 @@
         <div class="lightning-flash" id="lightningFlash"></div>
         <canvas id="weatherCanvas" class="weather-canvas"></canvas>
         <div class="weather-icon" id="weatherIcon">🏮</div>
-        <div class="weather-city" id="weatherCity">感应天气中...</div>
+        <div class="weather-city" id="weatherCity">加载中...</div>
         <div class="weather-temp" id="weatherTemp">--°C</div>
         <div class="weather-desc" id="weatherDesc">灯火常明</div>
         <div class="weather-update" id="weatherUpdate">✨ 灯火随天候而变</div>
@@ -392,21 +394,12 @@
 </div>
 
 <script>
-// ========== Supabase 配置 ==========
+// Supabase 配置
 const SUPABASE_URL = 'https://ziuzlbyepdcalmjfwbyz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_DONsSE_XcQQPTyLzTLaKtQ_p2CX8Gxd';
 
-// 动态加载 Supabase JS（绕过CDN屏蔽）
-const script = document.createElement('script');
-script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
-script.onload = () => {
-    window.supabase = supabase;
-    window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    initApp();
-};
-document.head.appendChild(script);
-
-let supabaseClient = null;
+// 创建客户端
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentLetters = [];
 let currentLetterIndex = null;
@@ -418,7 +411,6 @@ function getRandomName() {
 
 // 匿名登录
 async function anonymousLogin() {
-    if (!supabaseClient) return false;
     try {
         const { data, error } = await supabaseClient.auth.signInAnonymously();
         if (error) throw error;
@@ -433,13 +425,12 @@ async function anonymousLogin() {
 
 // 留言
 async function loadMessages() {
-    if (!supabaseClient) return;
     const { data, error } = await supabaseClient
         .from('messages')
         .select('*')
         .order('time', { ascending: false })
         .limit(50);
-    if (error) { console.error(error); return; }
+    if (error) { console.error('加载留言失败', error); return; }
     const container = document.getElementById('messageList');
     if (!container) return;
     container.innerHTML = data.map(m => `
@@ -451,7 +442,7 @@ async function loadMessages() {
 }
 
 async function sendMessage(content) {
-    if (!content.trim() || !supabaseClient) return;
+    if (!content.trim()) return;
     await supabaseClient.from('messages').insert({
         name: getRandomName(),
         content: content,
@@ -462,13 +453,12 @@ async function sendMessage(content) {
 
 // 心愿
 async function loadWishes() {
-    if (!supabaseClient) return;
     const { data, error } = await supabaseClient
         .from('wishes')
         .select('*')
         .order('time', { ascending: false })
         .limit(50);
-    if (error) { console.error(error); return; }
+    if (error) { console.error('加载心愿失败', error); return; }
     const container = document.getElementById('wishList');
     if (!container) return;
     container.innerHTML = data.map(w => `
@@ -480,7 +470,7 @@ async function loadWishes() {
 }
 
 async function sendWish(content) {
-    if (!content.trim() || !supabaseClient) return;
+    if (!content.trim()) return;
     await supabaseClient.from('wishes').insert({
         name: getRandomName(),
         content: content,
@@ -491,13 +481,13 @@ async function sendWish(content) {
 
 // 信件
 async function loadMyLetters() {
-    if (!supabaseClient || !currentUser) return;
+    if (!currentUser) return;
     const { data, error } = await supabaseClient
         .from('letters')
         .select('*')
         .eq('user_id', currentUser.id)
         .order('time', { ascending: false });
-    if (error) { console.error(error); return; }
+    if (error) { console.error('加载信件失败', error); return; }
     currentLetters = data || [];
     renderLettersList();
 }
@@ -522,7 +512,7 @@ function renderLettersList() {
 }
 
 async function saveLetter(body) {
-    if (!body.trim() || !supabaseClient || !currentUser) return;
+    if (!body.trim() || !currentUser) return;
     await supabaseClient.from('letters').insert({
         user_id: currentUser.id,
         body: body,
@@ -533,7 +523,7 @@ async function saveLetter(body) {
 
 async function deleteLetter(index) {
     const letter = currentLetters[index];
-    if (!letter || !supabaseClient) return;
+    if (!letter) return;
     await supabaseClient.from('letters').delete().eq('id', letter.id);
     await loadMyLetters();
 }
@@ -563,7 +553,7 @@ function escapeHtml(str) {
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
 
-// 天气特效（简化版）
+// 天气特效
 let weatherAnimationId = null, weatherCtx = null, weatherCanvas = null, weatherParticles = [], currentWeatherEffect = 'none';
 const weatherConfig = {
     '晴': { icon: '☀️', desc: '记得晒晒被子🌞' }, '晴夜': { icon: '🌙', desc: '今夜月色真美🌙' },
@@ -591,7 +581,7 @@ async function initWeather() {
             document.getElementById('weatherDesc').innerHTML = cfg.desc;
             if (cfg.effect) startWeatherEffect(cfg.effect);
         }
-    } catch(e) {}
+    } catch(e) { console.error('天气获取失败', e); }
 }
 
 function startWeatherEffect(effect) {
@@ -711,6 +701,7 @@ async function initApp() {
     await initWeather();
 }
 
+initApp();
 window.closeModal = closeModal;
 </script>
 </body>
