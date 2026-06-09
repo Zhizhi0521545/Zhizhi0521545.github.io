@@ -181,7 +181,7 @@
         .wish-card { border-left-color: #d4af37; background: rgba(20, 12, 38, 0.7); }
         .msg-name { font-weight: bold; color: #c58aff; font-size: 0.8rem; }
         .msg-time { font-size: 0.6rem; color: #b8a0d0; margin-left: 0.5rem; }
-        .msg-content { font-size: 0.85rem; margin-top: 0.2rem; }
+        .msg-content { font-size: 0.85rem; margin-top: 0.2rem;  color: #ffffff; }
         .letter-card {
             border-color: #d13a3a;
             animation: redBreathing 4s ease-in-out infinite;
@@ -566,22 +566,51 @@ const weatherConfig = {
 };
 
 async function initWeather() {
+    const GAODE_KEY = '068e5b43f1b1e33d2db1e82775a01038';
     try {
-        const res = await fetch('https://api.oioweb.cn/api/weather/CityWeather?city=autoip');
-        const data = await res.json();
-        if (data.code === 200) {
-            let w = data.data.weather;
-            if (w.includes('雨')) w = '中雨'; else if (w.includes('雪')) w = '小雪'; else if (w.includes('雷')) w = '雷阵雨';
-            else if (w.includes('雾')) w = '雾'; else if (w.includes('多云')) w = '多云'; else if (w.includes('阴')) w = '阴';
-            else w = '晴';
-            const cfg = weatherConfig[w];
+        // 第一步：通过 IP 获取城市 adcode
+        const ipRes = await fetch(`https://restapi.amap.com/v3/ip?key=${GAODE_KEY}`);
+        const ipData = await ipRes.json();
+        
+        if (ipData.status !== '1') throw new Error('IP定位失败');
+        
+        const adcode = ipData.adcode;
+        const city = ipData.city || '灯火城';
+        
+        // 第二步：获取天气
+        const weatherRes = await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?key=${GAODE_KEY}&city=${adcode}&extensions=base`);
+        const weatherData = await weatherRes.json();
+        
+        if (weatherData.status === '1' && weatherData.lives && weatherData.lives.length > 0) {
+            const live = weatherData.lives[0];
+            let weatherType = live.weather;
+            const temperature = live.temperature;
+            
+            // 映射天气类型
+            let type = '晴';
+            if (weatherType.includes('雨')) type = '中雨';
+            else if (weatherType.includes('雪')) type = '小雪';
+            else if (weatherType.includes('雷')) type = '雷阵雨';
+            else if (weatherType.includes('雾')) type = '雾';
+            else if (weatherType.includes('多云')) type = '多云';
+            else if (weatherType.includes('阴')) type = '阴';
+            else type = '晴';
+            
+            const cfg = weatherConfig[type] || weatherConfig['晴'];
             document.getElementById('weatherIcon').innerHTML = cfg.icon;
-            document.getElementById('weatherCity').innerHTML = data.data.city;
-            document.getElementById('weatherTemp').innerHTML = `${data.data.temp}°C`;
+            document.getElementById('weatherCity').innerHTML = city;
+            document.getElementById('weatherTemp').innerHTML = `${temperature}°C`;
             document.getElementById('weatherDesc').innerHTML = cfg.desc;
             if (cfg.effect) startWeatherEffect(cfg.effect);
+        } else {
+            throw new Error('天气查询失败');
         }
-    } catch(e) { console.error('天气获取失败', e); }
+    } catch(e) {
+        console.error('天气获取失败', e);
+        document.getElementById('weatherCity').innerHTML = '灯火城';
+        document.getElementById('weatherTemp').innerHTML = '--°C';
+        document.getElementById('weatherDesc').innerHTML = '灯火常明';
+    }
 }
 
 function startWeatherEffect(effect) {
