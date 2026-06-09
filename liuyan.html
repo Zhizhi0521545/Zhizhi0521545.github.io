@@ -567,23 +567,22 @@ const weatherConfig = {
 
 async function initWeather() {
     try {
-        // 使用 ip-api 获取城市（免费，无需 key）
-        const ipRes = await fetch('http://ip-api.com/json/');
-        const ipData = await ipRes.json();
-        let city = ipData.city || '灯火城';
+        // 1️⃣ 先用一个支持 https 的免费 IP 服务拿城市（中文）
+        const geoRes = await fetch('https://api.ip.sb/geoip');
+        const geoData = await geoRes.json();
         
-        // 手动修正几个常见英文城市名（可以继续加）
+        let city = geoData.city || '灯火城';
+        // 常见英文城市转中文（可选，好看而已）
         const cityMap = {
-            'Zhengzhou': '郑州',
-            'Luoyang': '洛阳',
-            'Jiyuan': '济源',
-            'Beijing': '北京',
-            'Shanghai': '上海'
+            'Zhengzhou': '郑州', 'Luoyang': '洛阳', 'Jiyuan': '济源',
+            'Beijing': '北京', 'Shanghai': '上海', 'Guangzhou': '广州',
+            'Shenzhen': '深圳', 'Chengdu': '成都', 'Hangzhou': '杭州',
+            'Wuhan': '武汉', 'Xi\'an': '西安', 'Nanjing': '南京'
         };
         if (cityMap[city]) city = cityMap[city];
         
-        // 使用 wttr.in 获取天气
-        const weatherRes = await fetch(`https://wttr.in/${ipData.city}?format=j1`);
+        // 2️⃣ 用 wttr.in 拿天气（完全 https，不需要 key）
+        const weatherRes = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
         const weatherData = await weatherRes.json();
         
         const temp = weatherData.current_condition[0].temp_C;
@@ -603,13 +602,15 @@ async function initWeather() {
         document.getElementById('weatherTemp').innerHTML = `${temp}°C`;
         document.getElementById('weatherDesc').innerHTML = cfg.desc;
         if (cfg.effect) startWeatherEffect(cfg.effect);
+        
+        console.log('✅ 天气获取成功', city, temp, type);
     } catch(e) {
-        console.error('天气获取失败', e);
+        console.error('天气获取失败，使用默认值', e);
         document.getElementById('weatherCity').innerHTML = '灯火城';
         document.getElementById('weatherTemp').innerHTML = '--°C';
+        document.getElementById('weatherDesc').innerHTML = '灯火常明';
     }
 }
-
 function startWeatherEffect(effect) {
     stopWeatherEffect();
     currentWeatherEffect = effect;
