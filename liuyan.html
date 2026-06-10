@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>留灯处 · 灯火集｜梅元知</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- 高德地图 JS API（已验证可用） -->
+    <!-- 高德地图 JS API -->
     <script src="https://webapi.amap.com/maps?v=2.0&key=0e974801b69df813740c13180b534056"></script>
     <script type="text/javascript">
         window._AMapSecurityConfig = {
@@ -115,7 +115,6 @@
             color: #f0e6ff;
             text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-        /* 地图容器 - 使用已验证能用的样式 */
         .map-container {
             margin-bottom: 1rem;
             border-radius: 32px;
@@ -355,7 +354,6 @@
         <p>「每一盏灯，都是一次抵达」</p>
     </div>
 
-    <!-- 地图容器（已验证可用） -->
     <div class="map-container">
         <div id="map"></div>
         <div style="text-align: center; margin-top: 6px; font-size: 12px; color: #ccc;">✨ 手动拖拽缩放地图，找到你的城市点灯</div>
@@ -419,7 +417,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ==================== Supabase 配置 ====================
+// Supabase 配置
 const SUPABASE_URL = 'https://ziuzlbyepdcalmjfwbyz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_DONsSE_XcQQPTyLzTLaKtQ_p2CX8Gxd';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -442,18 +440,14 @@ async function anonymousLogin() {
     }
 }
 
-// 随机昵称
 const namePrefix = ["点灯人·拂雪", "孤舟听剑", "月下梅影", "东域过客", "青衫不醉", "寒江一叶", "灯火守望者", "紫狐随行"];
 function getRandomName() {
     return namePrefix[Math.floor(Math.random() * namePrefix.length)];
 }
 
-// ========== 留言墙 ==========
+// 留言
 async function loadMessages() {
-    const { data, error } = await supabaseClient
-        .from('messages')
-        .select('*')
-        .order('time', { ascending: false });
+    const { data, error } = await supabaseClient.from('messages').select('*').order('time', { ascending: false });
     if (error) { console.error(error); return; }
     const container = document.getElementById('messageList');
     if (!container) return;
@@ -467,21 +461,13 @@ async function loadMessages() {
 
 async function sendMessage(content) {
     if (!content.trim()) return;
-    await supabaseClient.from('messages').insert({
-        name: getRandomName(),
-        content: content,
-        time: Date.now()
-    });
+    await supabaseClient.from('messages').insert({ name: getRandomName(), content: content, time: Date.now() });
     await loadMessages();
-    await recordCityLight();
 }
 
-// ========== 心愿池 ==========
+// 心愿
 async function loadWishes() {
-    const { data, error } = await supabaseClient
-        .from('wishes')
-        .select('*')
-        .order('time', { ascending: false });
+    const { data, error } = await supabaseClient.from('wishes').select('*').order('time', { ascending: false });
     if (error) { console.error(error); return; }
     const container = document.getElementById('wishList');
     if (!container) return;
@@ -495,23 +481,14 @@ async function loadWishes() {
 
 async function sendWish(content) {
     if (!content.trim()) return;
-    await supabaseClient.from('wishes').insert({
-        name: getRandomName(),
-        content: content,
-        time: Date.now()
-    });
+    await supabaseClient.from('wishes').insert({ name: getRandomName(), content: content, time: Date.now() });
     await loadWishes();
-    await recordCityLight();
 }
 
-// ========== 信件 ==========
+// 信件
 async function loadMyLetters() {
     if (!currentUser) return;
-    const { data, error } = await supabaseClient
-        .from('letters')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('time', { ascending: false });
+    const { data, error } = await supabaseClient.from('letters').select('*').eq('user_id', currentUser.id).order('time', { ascending: false });
     if (error) { console.error(error); return; }
     currentLetters = data || [];
     renderLettersList();
@@ -538,11 +515,7 @@ function renderLettersList() {
 
 async function saveLetter(body) {
     if (!body.trim() || !currentUser) return;
-    await supabaseClient.from('letters').insert({
-        user_id: currentUser.id,
-        body: body,
-        time: Date.now()
-    });
+    await supabaseClient.from('letters').insert({ user_id: currentUser.id, body: body, time: Date.now() });
     await loadMyLetters();
 }
 
@@ -568,100 +541,55 @@ function closeModal() {
     currentLetterIndex = null;
 }
 
-// ========== 点灯记录城市（自动存坐标） ==========
-async function recordCityLight() {
+// 天气（已修正济源显示）
+async function initWeather() {
     try {
-        const geoRes = await fetch(`https://restapi.amap.com/v3/ip?key=0e974801b69df813740c13180b534056`);
-const geoData = await geoRes.json();
-let cityName = geoData.city || geoData.province || '灯火城';
-if (cityName === '[]') cityName = geoData.province || '灯火城';
-        if (!cityName || cityName === '') cityName = '灯火城';
+        const res = await fetch('https://api.ip.sb/geoip');
+        const data = await res.json();
+        let city = data.city || '灯火城';
         
-        const geocodeUrl = `https://restapi.amap.com/v3/geocode/geo?key=0e974801b69df813740c13180b534056&address=${encodeURIComponent(cityName)}&output=JSON`;
-        const geoResAMap = await fetch(geocodeUrl);
-        const geoJson = await geoResAMap.json();
-        let lng = null, lat = null;
-        if (geoJson.status === '1' && geoJson.geocodes && geoJson.geocodes.length > 0) {
-            const location = geoJson.geocodes[0].location;
-            const parts = location.split(',');
-            lng = parseFloat(parts[0]);
-            lat = parseFloat(parts[1]);
-        }
+        // 修正济源显示（IP 被识别成平顶山时手动改回来）
+        if (city === '平顶山') city = '济源';
         
-        if (cityName && cityName !== '灯火城' && lng && lat) {
-            const { data: existing } = await supabaseClient
-                .from('lit_cities')
-                .select('id, count')
-                .eq('city', cityName)
-                .maybeSingle();
-            if (existing) {
-                await supabaseClient
-                    .from('lit_cities')
-                    .update({ count: existing.count + 1, updated_at: new Date() })
-                    .eq('id', existing.id);
-            } else {
-                await supabaseClient
-                    .from('lit_cities')
-                    .insert({ city: cityName, lng: lng, lat: lat, count: 1 });
-            }
-        }
-        await loadMapMarkers();
+        const weatherRes = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
+        const weatherData = await weatherRes.json();
+        const temp = weatherData.current_condition[0].temp_C;
+        const condition = weatherData.current_condition[0].weatherDesc[0].value.toLowerCase();
+        
+        let type = '晴';
+        if (condition.includes('rain')) type = '中雨';
+        else if (condition.includes('snow')) type = '小雪';
+        else if (condition.includes('thunder')) type = '雷阵雨';
+        else if (condition.includes('fog')) type = '雾';
+        else if (condition.includes('cloud')) type = '多云';
+        else if (condition.includes('overcast')) type = '阴';
+        
+        const cfg = {
+            '晴': { icon: '☀️', desc: '记得晒晒被子🌞' },
+            '中雨': { icon: '🌧️', desc: '雨声助眠💤' },
+            '小雪': { icon: '🌨️', desc: '加件毛衣🧣' },
+            '雷阵雨': { icon: '⛈️', desc: '关好窗⚡' },
+            '雾': { icon: '🌫️', desc: '慢一点，安全第一🚗' },
+            '多云': { icon: '⛅', desc: '云朵在偷懒☁️' },
+            '阴': { icon: '☁️', desc: '适合窝着看书📖' }
+        }[type] || { icon: '☀️', desc: '记得晒晒被子🌞' };
+        
+        document.getElementById('weatherIcon').innerHTML = cfg.icon;
+        document.getElementById('weatherCity').innerHTML = city;
+        document.getElementById('weatherTemp').innerHTML = `${temp}°C`;
+        document.getElementById('weatherDesc').innerHTML = cfg.desc;
     } catch(e) {
-        console.warn('记录城市点灯失败', e);
+        console.warn('天气获取失败', e);
+        document.getElementById('weatherCity').innerHTML = '灯火城';
+        document.getElementById('weatherTemp').innerHTML = '--°C';
+        document.getElementById('weatherDesc').innerHTML = '灯火常明';
     }
 }
 
-// 加载地图上的光点
-async function loadMapMarkers() {
-    if (!map) return;
-    markers.forEach(m => m.setMap(null));
-    markers = [];
-    
-    const { data, error } = await supabaseClient
-        .from('lit_cities')
-        .select('city, lng, lat, count')
-        .not('lng', 'is', null)
-        .not('lat', 'is', null);
-    if (error || !data) return;
-    
-    data.forEach(city => {
-        if (city.lng && city.lat) {
-            const marker = new AMap.Marker({
-                position: [city.lng, city.lat],
-                title: `${city.city} · ${city.count}盏灯`,
-                label: {
-                    content: `<span style="background: #d4af37; color: #1a1a2e; padding: 2px 6px; border-radius: 12px; font-size: 12px;">🏮 ${city.city} ${city.count}</span>`,
-                    offset: new AMap.Pixel(0, -20),
-                    direction: 'top'
-                }
-            });
-            marker.setMap(map);
-            markers.push(marker);
-        }
-    });
-    
-    if (data.length > 0) {
-        const bounds = new AMap.Bounds();
-        data.forEach(city => {
-            if (city.lng && city.lat) {
-                bounds.extend([city.lng, city.lat]);
-            }
-        });
-        if (data.length === 1 && data[0].lng && data[0].lat) {
-            map.setCenter([data[0].lng, data[0].lat]);
-            map.setZoom(8);
-        } else {
-            map.setBounds(bounds);
-        }
-    } else {
-        map.setCenter([113.3, 34.6]);
-        map.setZoom(6);
-    }
-}
-
-// 初始化地图
+// 地图
 let map = null;
 let markers = [];
+
 function initMap() {
     map = new AMap.Map('map', {
         zoom: 6,
@@ -669,12 +597,25 @@ function initMap() {
         viewMode: '2D',
         mapStyle: 'amap://styles/dark'
     });
-    map.on('complete', () => {
-        loadMapMarkers();
+    loadMapMarkers();
+}
+
+async function loadMapMarkers() {
+    if (!map) return;
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+    const { data } = await supabaseClient.from('lit_cities').select('city, lng, lat, count').not('lng', 'is', null).not('lat', 'is', null);
+    if (!data) return;
+    data.forEach(city => {
+        const marker = new AMap.Marker({
+            position: [city.lng, city.lat],
+            label: { content: `🏮 ${city.city} ${city.count}`, offset: new AMap.Pixel(0, -20) },
+            map: map
+        });
+        markers.push(marker);
     });
 }
 
-// ========== 工具函数 ==========
 function formatTime(ts) {
     const d = new Date(ts);
     return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
@@ -684,148 +625,25 @@ function escapeHtml(str) {
     return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
 }
 
-// ========== 天气特效 ==========
-let weatherAnimationId = null, weatherCtx = null, weatherCanvas = null, weatherParticles = [], currentWeatherEffect = 'none';
-const weatherConfig = {
-    '晴': { icon: '☀️', desc: '记得晒晒被子🌞' }, '晴夜': { icon: '🌙', desc: '今夜月色真美🌙' },
-    '多云': { icon: '⛅', desc: '云朵在偷懒☁️' }, '阴': { icon: '☁️', desc: '适合窝着看书📖' },
-    '小雨': { icon: '🌦️', desc: '出门记得带伞☔', effect: 'light_rain' }, '中雨': { icon: '🌧️', desc: '雨声助眠💤', effect: 'medium_rain' },
-    '大雨': { icon: '🌧️💧', desc: '少出门，多喝茶🍵', effect: 'heavy_rain' }, '暴雨': { icon: '⛈️💧', desc: '注意安全🌊', effect: 'storm_rain' },
-    '小雪': { icon: '🌨️', desc: '加件毛衣🧣', effect: 'light_snow' }, '中雪': { icon: '❄️❄️', desc: '小心路滑⚠️', effect: 'medium_snow' },
-    '大雪': { icon: '❄️❄️❄️', desc: '堆雪人吧⛄', effect: 'heavy_snow' }, '雾': { icon: '🌫️', desc: '慢一点，安全第一🚗' },
-    '雷阵雨': { icon: '⛈️', desc: '关好窗⚡', effect: 'thunderstorm' }, '雷暴': { icon: '🌩️⚡', desc: '拔掉电器插头🔌', effect: 'thunderstorm' }
-};
-async function initWeather() {
-    try {
-        const geoRes = await fetch(`https://restapi.amap.com/v3/ip?key=0e974801b69df813740c13180b534056`);
-const geoData = await geoRes.json();
-let city = geoData.city || geoData.province || '灯火城';
-if (city === '[]') city = geoData.province || '灯火城';
-        const weatherRes = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
-        const weatherData = await weatherRes.json();
-        const temp = weatherData.current_condition[0].temp_C;
-        let condition = weatherData.current_condition[0].weatherDesc[0].value.toLowerCase();
-        let type = '晴';
-        if (condition.includes('rain')) type = '中雨';
-        else if (condition.includes('snow')) type = '小雪';
-        else if (condition.includes('thunder')) type = '雷阵雨';
-        else if (condition.includes('fog')) type = '雾';
-        else if (condition.includes('cloud')) type = '多云';
-        else if (condition.includes('overcast')) type = '阴';
-        const cfg = weatherConfig[type] || weatherConfig['晴'];
-        document.getElementById('weatherIcon').innerHTML = cfg.icon;
-        document.getElementById('weatherCity').innerHTML = city;
-        document.getElementById('weatherTemp').innerHTML = `${temp}°C`;
-        document.getElementById('weatherDesc').innerHTML = cfg.desc;
-        if (cfg.effect) startWeatherEffect(cfg.effect);
-    } catch(e) { console.warn(e); }
-}
-function startWeatherEffect(effect) {
-    stopWeatherEffect();
-    currentWeatherEffect = effect;
-    const card = document.getElementById('weatherCard');
-    weatherCanvas = document.getElementById('weatherCanvas');
-    if (!weatherCanvas) return;
-    const rect = card.getBoundingClientRect();
-    weatherCanvas.width = rect.width;
-    weatherCanvas.height = rect.height;
-    if (effect.includes('rain')) startRainEffect(effect);
-    if (effect.includes('snow')) startSnowEffect(effect);
-    if (effect === 'thunderstorm') { startRainEffect('heavy_rain'); startLightning(); }
-}
-function startRainEffect(effect) {
-    let count = effect === 'light_rain' ? 80 : effect === 'medium_rain' ? 150 : 220;
-    weatherCtx = weatherCanvas.getContext('2d');
-    weatherParticles = [];
-    for (let i = 0; i < count; i++) weatherParticles.push({ x: Math.random() * weatherCanvas.width, y: Math.random() * weatherCanvas.height, length: 8 + Math.random() * 15, speed: 6 + Math.random() * 12 });
-    function draw() {
-        if (!weatherCtx || !weatherCanvas || !currentWeatherEffect.includes('rain')) return;
-        weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
-        for (let p of weatherParticles) {
-            weatherCtx.beginPath();
-            weatherCtx.moveTo(p.x, p.y);
-            weatherCtx.lineTo(p.x - 2, p.y + p.length);
-            weatherCtx.strokeStyle = 'rgba(180, 210, 240, 0.5)';
-            weatherCtx.stroke();
-            p.y += p.speed;
-            if (p.y > weatherCanvas.height) { p.y = -p.length; p.x = Math.random() * weatherCanvas.width; }
-        }
-        weatherAnimationId = requestAnimationFrame(draw);
-    }
-    draw();
-}
-function startSnowEffect(effect) {
-    let count = effect === 'light_snow' ? 60 : effect === 'medium_snow' ? 100 : 150;
-    weatherCtx = weatherCanvas.getContext('2d');
-    weatherParticles = [];
-    for (let i = 0; i < count; i++) weatherParticles.push({ x: Math.random() * weatherCanvas.width, y: Math.random() * weatherCanvas.height, radius: 2 + Math.random() * 4, speed: 1 + Math.random() * 3 });
-    function draw() {
-        if (!weatherCtx || !weatherCanvas || !currentWeatherEffect.includes('snow')) return;
-        weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
-        for (let p of weatherParticles) {
-            weatherCtx.beginPath();
-            weatherCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            weatherCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            weatherCtx.fill();
-            p.y += p.speed;
-            if (p.y > weatherCanvas.height) { p.y = -p.radius; p.x = Math.random() * weatherCanvas.width; }
-        }
-        weatherAnimationId = requestAnimationFrame(draw);
-    }
-    draw();
-}
-let lightningTimeout = null;
-function startLightning() {
-    const flash = document.getElementById('lightningFlash');
-    function schedule() {
-        if (currentWeatherEffect !== 'thunderstorm') return;
-        lightningTimeout = setTimeout(() => {
-            flash.style.background = 'rgba(255, 255, 200, 0.8)';
-            setTimeout(() => flash.style.background = 'transparent', 100);
-            schedule();
-        }, 4000 + Math.random() * 4000);
-    }
-    schedule();
-}
-function stopWeatherEffect() {
-    if (weatherAnimationId) cancelAnimationFrame(weatherAnimationId);
-    if (lightningTimeout) clearTimeout(lightningTimeout);
-    if (weatherCtx && weatherCanvas) weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
-    const flash = document.getElementById('lightningFlash');
-    if (flash) flash.style.background = 'transparent';
-}
-window.addEventListener('resize', () => {
-    if (weatherCanvas && currentWeatherEffect !== 'none') {
-        const rect = document.getElementById('weatherCard').getBoundingClientRect();
-        weatherCanvas.width = rect.width;
-        weatherCanvas.height = rect.height;
-    }
+document.getElementById('sendMsgBtn')?.addEventListener('click', async () => {
+    const input = document.getElementById('msgInput');
+    if (input.value.trim()) { await sendMessage(input.value); input.value = ''; }
 });
+document.getElementById('sendWishBtn')?.addEventListener('click', async () => {
+    const input = document.getElementById('wishInput');
+    if (input.value.trim()) { await sendWish(input.value); input.value = ''; }
+});
+document.getElementById('saveLetterBtn')?.addEventListener('click', async () => {
+    const body = document.getElementById('letterBody').value.trim();
+    if (body) { await saveLetter(body); document.getElementById('letterBody').value = ''; alert('📬 信件已存档'); }
+});
+document.getElementById('modalDeleteBtn')?.addEventListener('click', async () => {
+    if (currentLetterIndex !== null && confirm('确定删除吗？')) { await deleteLetter(currentLetterIndex); closeModal(); alert('已删除'); }
+});
+document.getElementById('letterModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('letterModal')) closeModal(); });
+document.getElementById('navToggle')?.addEventListener('click', () => document.querySelector('.nav-menu')?.classList.toggle('active'));
 
-// ========== 绑定UI事件 ==========
-function bindEvents() {
-    document.getElementById('sendMsgBtn')?.addEventListener('click', async () => {
-        const input = document.getElementById('msgInput');
-        if (input.value.trim()) { await sendMessage(input.value); input.value = ''; }
-    });
-    document.getElementById('sendWishBtn')?.addEventListener('click', async () => {
-        const input = document.getElementById('wishInput');
-        if (input.value.trim()) { await sendWish(input.value); input.value = ''; }
-    });
-    document.getElementById('saveLetterBtn')?.addEventListener('click', async () => {
-        const body = document.getElementById('letterBody').value.trim();
-        if (body) { await saveLetter(body); document.getElementById('letterBody').value = ''; alert('📬 信件已存档'); }
-    });
-    document.getElementById('modalDeleteBtn')?.addEventListener('click', async () => {
-        if (currentLetterIndex !== null && confirm('确定删除吗？')) { await deleteLetter(currentLetterIndex); closeModal(); alert('已删除'); }
-    });
-    document.getElementById('letterModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('letterModal')) closeModal(); });
-    document.getElementById('navToggle')?.addEventListener('click', () => document.querySelector('.nav-menu')?.classList.toggle('active'));
-}
-
-// ========== 应用初始化 ==========
-async function initApp() {
-    bindEvents();
+async function init() {
     await anonymousLogin();
     await loadMessages();
     await loadWishes();
@@ -833,8 +651,7 @@ async function initApp() {
     await initWeather();
     initMap();
 }
-
-initApp();
+init();
 window.closeModal = closeModal;
 </script>
 </body>
