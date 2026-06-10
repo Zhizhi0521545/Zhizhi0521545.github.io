@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>留灯处 · 灯火集｜梅元知</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Supabase SDK 直接加载（不用动态加载了） -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 高德地图 JS API -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=0e974801b69df813740c13180b534056"></script>
+    <!-- 高德地图安全密钥 -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: 'a4b9a174f296768510a32f5bc7c286fd'
+        };
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -111,6 +117,31 @@
             color: #f0e6ff;
             text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
+        /* 地图容器 */
+        .map-container {
+            margin-bottom: 1rem;
+            border-radius: 32px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+        }
+        #map {
+            width: 100%;
+            height: 300px;
+            border-radius: 24px;
+        }
+        .map-title {
+            text-align: center;
+            color: #f0e6ff;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            padding: 0.25rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            display: inline-block;
+            width: auto;
+        }
         .weather-card {
             position: relative;
             background: rgba(0, 0, 0, 0.45);
@@ -181,7 +212,7 @@
         .wish-card { border-left-color: #d4af37; background: rgba(20, 12, 38, 0.7); }
         .msg-name { font-weight: bold; color: #c58aff; font-size: 0.8rem; }
         .msg-time { font-size: 0.6rem; color: #b8a0d0; margin-left: 0.5rem; }
-        .msg-content { font-size: 0.85rem; margin-top: 0.2rem;  color: #ffffff; }
+        .msg-content { font-size: 0.85rem; margin-top: 0.2rem; color: #ffffff; }
         .letter-card {
             border-color: #d13a3a;
             animation: redBreathing 4s ease-in-out infinite;
@@ -309,6 +340,7 @@
                 transition: 0.3s;
             }
             .nav-menu.active { left: 0; }
+            #map { height: 200px; }
         }
     </style>
 </head>
@@ -337,14 +369,24 @@
         <p>「每一盏灯，都是一次抵达」</p>
     </div>
 
+    <!-- 天气卡片 -->
     <div class="weather-card" id="weatherCard">
         <div class="lightning-flash" id="lightningFlash"></div>
         <canvas id="weatherCanvas" class="weather-canvas"></canvas>
         <div class="weather-icon" id="weatherIcon">🏮</div>
-        <div class="weather-city" id="weatherCity">加载中...</div>
+        <div class="weather-city" id="weatherCity">感应天气中...</div>
         <div class="weather-temp" id="weatherTemp">--°C</div>
         <div class="weather-desc" id="weatherDesc">灯火常明</div>
         <div class="weather-update" id="weatherUpdate">✨ 灯火随天候而变</div>
+    </div>
+
+    <!-- 点灯地图 -->
+    <div class="map-container">
+        <div style="text-align: center; margin-bottom: 4px;">
+            <span class="map-title"><i class="fas fa-map-marker-alt"></i> 灯火照亮的地方 · 点灯地图</span>
+        </div>
+        <div id="map"></div>
+        <div style="text-align: center; margin-top: 6px; font-size: 12px; color: #ccc;">✨ 每一盏灯，都是一个城市的心意</div>
     </div>
 
     <div class="msg-wall">
@@ -393,21 +435,18 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase 配置
+// ==================== Supabase 配置 ====================
 const SUPABASE_URL = 'https://ziuzlbyepdcalmjfwbyz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_DONsSE_XcQQPTyLzTLaKtQ_p2CX8Gxd';
-
-// 创建客户端
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let currentUser = null;
 let currentLetters = [];
 let currentLetterIndex = null;
-
-const namePrefix = ["点灯人·拂雪", "孤舟听剑", "月下梅影", "东域过客", "青衫不醉", "寒江一叶", "灯火守望者", "紫狐随行"];
-function getRandomName() {
-    return namePrefix[Math.floor(Math.random() * namePrefix.length)];
-}
+let map = null;
+let markers = [];
 
 // 匿名登录
 async function anonymousLogin() {
@@ -423,13 +462,18 @@ async function anonymousLogin() {
     }
 }
 
-// 留言
+// 随机昵称
+const namePrefix = ["点灯人·拂雪", "孤舟听剑", "月下梅影", "东域过客", "青衫不醉", "寒江一叶", "灯火守望者", "紫狐随行"];
+function getRandomName() {
+    return namePrefix[Math.floor(Math.random() * namePrefix.length)];
+}
+
+// ========== 留言墙 ==========
 async function loadMessages() {
-    if (!supabaseClient) return;
     const { data, error } = await supabaseClient
         .from('messages')
         .select('*')
-        .order('time', { ascending: false });  // 去掉 limit，显示全部
+        .order('time', { ascending: false });
     if (error) { console.error(error); return; }
     const container = document.getElementById('messageList');
     if (!container) return;
@@ -449,11 +493,11 @@ async function sendMessage(content) {
         time: Date.now()
     });
     await loadMessages();
+    await recordCityLight(); // 点灯时记录城市
 }
 
-// 心愿
+// ========== 心愿池 ==========
 async function loadWishes() {
-    if (!supabaseClient) return;
     const { data, error } = await supabaseClient
         .from('wishes')
         .select('*')
@@ -477,9 +521,10 @@ async function sendWish(content) {
         time: Date.now()
     });
     await loadWishes();
+    await recordCityLight(); // 点灯时记录城市
 }
 
-// 信件
+// ========== 信件 ==========
 async function loadMyLetters() {
     if (!currentUser) return;
     const { data, error } = await supabaseClient
@@ -487,7 +532,7 @@ async function loadMyLetters() {
         .select('*')
         .eq('user_id', currentUser.id)
         .order('time', { ascending: false });
-    if (error) { console.error('加载信件失败', error); return; }
+    if (error) { console.error(error); return; }
     currentLetters = data || [];
     renderLettersList();
 }
@@ -543,17 +588,123 @@ function closeModal() {
     currentLetterIndex = null;
 }
 
+// ========== 点灯记录城市（自动存坐标 + 更新地图） ==========
+async function recordCityLight() {
+    try {
+        // 1. 获取当前城市名
+        const geoRes = await fetch('https://api.ip.sb/geoip');
+        const geoData = await geoRes.json();
+        let cityName = geoData.city || '灯火城';
+        if (!cityName || cityName === '') cityName = '灯火城';
+        
+        // 2. 调高德地理编码：城市名 -> 经纬度
+        const geocodeUrl = `https://restapi.amap.com/v3/geocode/geo?key=0e974801b69df813740c13180b534056&address=${encodeURIComponent(cityName)}&output=JSON`;
+        const geoResAMap = await fetch(geocodeUrl);
+        const geoJson = await geoResAMap.json();
+        let lng = null, lat = null;
+        if (geoJson.status === '1' && geoJson.geocodes && geoJson.geocodes.length > 0) {
+            const location = geoJson.geocodes[0].location;
+            const parts = location.split(',');
+            lng = parseFloat(parts[0]);
+            lat = parseFloat(parts[1]);
+        }
+        
+        // 3. 存入 lit_cities（如果已有则 count+1）
+        if (cityName && cityName !== '灯火城') {
+            // 先查询是否已存在
+            const { data: existing } = await supabaseClient
+                .from('lit_cities')
+                .select('id, count')
+                .eq('city', cityName)
+                .maybeSingle();
+            if (existing) {
+                await supabaseClient
+                    .from('lit_cities')
+                    .update({ count: existing.count + 1, updated_at: new Date() })
+                    .eq('id', existing.id);
+            } else {
+                await supabaseClient
+                    .from('lit_cities')
+                    .insert({ city: cityName, lng: lng, lat: lat, count: 1 });
+            }
+        }
+        await loadMapMarkers();  // 刷新地图点
+    } catch(e) {
+        console.warn('记录城市点灯失败', e);
+    }
+}
+
+// 加载地图上的光点（从 lit_cities 表读取）
+async function loadMapMarkers() {
+    if (!map) return;
+    // 清除现有标记
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+    
+    const { data, error } = await supabaseClient
+        .from('lit_cities')
+        .select('city, lng, lat, count')
+        .not('lng', 'is', null)
+        .not('lat', 'is', null);
+    if (error || !data) return;
+    
+    data.forEach(city => {
+        if (city.lng && city.lat) {
+            const marker = new AMap.Marker({
+                position: [city.lng, city.lat],
+                title: `${city.city} · ${city.count}盏灯`,
+                label: {
+                    content: `<span style="background: #d4af37; color: #1a1a2e; padding: 2px 6px; border-radius: 12px; font-size: 12px;">🏮 ${city.city} ${city.count}</span>`,
+                    offset: new AMap.Pixel(0, -20),
+                    direction: 'top'
+                }
+            });
+            marker.setMap(map);
+            markers.push(marker);
+        }
+    });
+    
+    // 自动调整视野以包含所有点
+    if (data.length > 0) {
+        const bounds = new AMap.Bounds();
+        data.forEach(city => {
+            if (city.lng && city.lat) {
+                bounds.extend([city.lng, city.lat]);
+            }
+        });
+        map.setBounds(bounds);
+    } else {
+        map.setCenter([116.397428, 39.90923]); // 默认北京
+        map.setZoom(5);
+    }
+}
+
+// 初始化高德地图
+function initMap() {
+    if (!AMap) {
+        setTimeout(initMap, 500);
+        return;
+    }
+    map = new AMap.Map('map', {
+        zoom: 5,
+        center: [116.397428, 39.90923],
+        viewMode: '2D',
+        mapStyle: 'amap://styles/dark'  // 深色风格，符合灯火集氛围
+    });
+    loadMapMarkers();
+}
+
+// ========== 工具函数 ==========
 function formatTime(ts) {
     const d = new Date(ts);
     return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
 }
-
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
 
-// 天气特效
+// ========== 天气特效（简化版，保留） ==========
 let weatherAnimationId = null, weatherCtx = null, weatherCanvas = null, weatherParticles = [], currentWeatherEffect = 'none';
 const weatherConfig = {
     '晴': { icon: '☀️', desc: '记得晒晒被子🌞' }, '晴夜': { icon: '🌙', desc: '今夜月色真美🌙' },
@@ -564,38 +715,15 @@ const weatherConfig = {
     '大雪': { icon: '❄️❄️❄️', desc: '堆雪人吧⛄', effect: 'heavy_snow' }, '雾': { icon: '🌫️', desc: '慢一点，安全第一🚗' },
     '雷阵雨': { icon: '⛈️', desc: '关好窗⚡', effect: 'thunderstorm' }, '雷暴': { icon: '🌩️⚡', desc: '拔掉电器插头🔌', effect: 'thunderstorm' }
 };
-
 async function initWeather() {
     try {
-        // 1️⃣ 先用一个支持 https 的免费 IP 服务拿城市（中文）
         const geoRes = await fetch('https://api.ip.sb/geoip');
         const geoData = await geoRes.json();
-        
-       let city = geoData.city || '灯火城';
-
-// 只优化济源周边 IP 识别问题（不影响其他人）
-const cityFix = {
-  'Pingdingshan': '济源',
-  'Zhengzhou': '济源',
-  'Luoyang': '济源'
-};
-if (cityFix[city]) city = cityFix[city];
-        // 常见英文城市转中文（可选，好看而已）
-        const cityMap = {
-            'Zhengzhou': '郑州', 'Luoyang': '洛阳', 'Jiyuan': '济源',
-            'Beijing': '北京', 'Shanghai': '上海', 'Guangzhou': '广州',
-            'Shenzhen': '深圳', 'Chengdu': '成都', 'Hangzhou': '杭州',
-            'Wuhan': '武汉', 'Xi\'an': '西安', 'Nanjing': '南京'
-        };
-        if (cityMap[city]) city = cityMap[city];
-        
-        // 2️⃣ 用 wttr.in 拿天气（完全 https，不需要 key）
+        let city = geoData.city || '灯火城';
         const weatherRes = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
         const weatherData = await weatherRes.json();
-        
         const temp = weatherData.current_condition[0].temp_C;
         let condition = weatherData.current_condition[0].weatherDesc[0].value.toLowerCase();
-        
         let type = '晴';
         if (condition.includes('rain')) type = '中雨';
         else if (condition.includes('snow')) type = '小雪';
@@ -603,21 +731,13 @@ if (cityFix[city]) city = cityFix[city];
         else if (condition.includes('fog')) type = '雾';
         else if (condition.includes('cloud')) type = '多云';
         else if (condition.includes('overcast')) type = '阴';
-        
         const cfg = weatherConfig[type] || weatherConfig['晴'];
         document.getElementById('weatherIcon').innerHTML = cfg.icon;
         document.getElementById('weatherCity').innerHTML = city;
         document.getElementById('weatherTemp').innerHTML = `${temp}°C`;
         document.getElementById('weatherDesc').innerHTML = cfg.desc;
         if (cfg.effect) startWeatherEffect(cfg.effect);
-        
-        console.log('✅ 天气获取成功', city, temp, type);
-    } catch(e) {
-        console.error('天气获取失败，使用默认值', e);
-        document.getElementById('weatherCity').innerHTML = '灯火城';
-        document.getElementById('weatherTemp').innerHTML = '--°C';
-        document.getElementById('weatherDesc').innerHTML = '灯火常明';
-    }
+    } catch(e) { console.warn(e); }
 }
 function startWeatherEffect(effect) {
     stopWeatherEffect();
@@ -632,7 +752,6 @@ function startWeatherEffect(effect) {
     if (effect.includes('snow')) startSnowEffect(effect);
     if (effect === 'thunderstorm') { startRainEffect('heavy_rain'); startLightning(); }
 }
-
 function startRainEffect(effect) {
     let count = effect === 'light_rain' ? 80 : effect === 'medium_rain' ? 150 : 220;
     weatherCtx = weatherCanvas.getContext('2d');
@@ -654,7 +773,6 @@ function startRainEffect(effect) {
     }
     draw();
 }
-
 function startSnowEffect(effect) {
     let count = effect === 'light_snow' ? 60 : effect === 'medium_snow' ? 100 : 150;
     weatherCtx = weatherCanvas.getContext('2d');
@@ -675,7 +793,6 @@ function startSnowEffect(effect) {
     }
     draw();
 }
-
 let lightningTimeout = null;
 function startLightning() {
     const flash = document.getElementById('lightningFlash');
@@ -689,7 +806,6 @@ function startLightning() {
     }
     schedule();
 }
-
 function stopWeatherEffect() {
     if (weatherAnimationId) cancelAnimationFrame(weatherAnimationId);
     if (lightningTimeout) clearTimeout(lightningTimeout);
@@ -697,7 +813,6 @@ function stopWeatherEffect() {
     const flash = document.getElementById('lightningFlash');
     if (flash) flash.style.background = 'transparent';
 }
-
 window.addEventListener('resize', () => {
     if (weatherCanvas && currentWeatherEffect !== 'none') {
         const rect = document.getElementById('weatherCard').getBoundingClientRect();
@@ -706,7 +821,7 @@ window.addEventListener('resize', () => {
     }
 });
 
-// 绑定事件
+// ========== 绑定UI事件 ==========
 function bindEvents() {
     document.getElementById('sendMsgBtn')?.addEventListener('click', async () => {
         const input = document.getElementById('msgInput');
@@ -727,6 +842,7 @@ function bindEvents() {
     document.getElementById('navToggle')?.addEventListener('click', () => document.querySelector('.nav-menu')?.classList.toggle('active'));
 }
 
+// ========== 应用初始化 ==========
 async function initApp() {
     bindEvents();
     await anonymousLogin();
@@ -734,6 +850,7 @@ async function initApp() {
     await loadWishes();
     await loadMyLetters();
     await initWeather();
+    initMap();  // 启动地图
 }
 
 initApp();
