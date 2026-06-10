@@ -138,6 +138,21 @@
             border: 1px solid rgba(255, 255, 255, 0.25);
             overflow: hidden;
         }
+        .city-switch {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 0.7rem;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: #d4af37;
+            z-index: 10;
+        }
+        .city-switch:hover {
+            background: rgba(0,0,0,0.7);
+        }
         .weather-icon { font-size: 3rem; margin-bottom: 0.25rem; position: relative; z-index: 5; }
         .weather-city { font-size: 1.3rem; font-weight: 600; letter-spacing: 2px; position: relative; z-index: 5; color: #f0e6ff; }
         .weather-temp { font-size: 2rem; font-weight: bold; margin: 0.25rem 0; position: relative; z-index: 5; color: #ffec80; }
@@ -312,6 +327,45 @@
             border-top: 1px solid rgba(197, 138, 255, 0.2);
             padding-top: 1rem;
         }
+        .city-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        .city-modal-content {
+            background: #0a0a0f;
+            border: 1px solid #d4af37;
+            border-radius: 32px;
+            padding: 1.5rem;
+            width: 280px;
+            text-align: center;
+        }
+        .city-modal-content input {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 1rem 0;
+            border-radius: 24px;
+            border: 1px solid #d4af37;
+            background: #1a1a2e;
+            color: white;
+            text-align: center;
+        }
+        .city-modal-content button {
+            background: #d4af37;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 24px;
+            cursor: pointer;
+            margin: 0 0.3rem;
+        }
         @media (max-width: 700px) {
             .container { padding: 80px 1rem 2rem; }
             .nav-toggle { display: block; }
@@ -328,9 +382,124 @@
             #map { height: 200px; }
         }
     </style>
+
+    <!-- 公告弹窗样式 -->
+<style>
+    .notice-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(12px);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Segoe UI', '华文楷书', 'Microsoft YaHei', sans-serif;
+    }
+    .notice-card {
+        max-width: 500px;
+        width: 85%;
+        background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+        border-radius: 48px;
+        padding: 1.8rem 1.5rem;
+        border: 1px solid rgba(212, 175, 55, 0.4);
+        box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        animation: fadeInScale 0.25s ease-out;
+        text-align: center;
+    }
+    .notice-card h3 {
+        font-size: 1.6rem;
+        color: #d4af37;
+        margin-bottom: 0.5rem;
+        font-family: '华文楷书', 'KaiTi', serif;
+    }
+    .notice-date {
+        font-size: 0.7rem;
+        color: #b8a0d0;
+        margin-bottom: 1rem;
+        letter-spacing: 1px;
+    }
+    .notice-content {
+        text-align: left;
+        color: #e8d9ff;
+        font-size: 0.85rem;
+        line-height: 1.65;
+        margin: 1rem 0;
+        padding: 0 0.5rem;
+    }
+    .notice-content li {
+        margin: 0.5rem 0;
+        list-style: none;
+        padding-left: 1.2rem;
+        position: relative;
+    }
+    .notice-content li::before {
+        content: "#";
+        position: absolute;
+        left: -0.2rem;
+        top: 0;
+        font-size: 0.8rem;
+    }
+    .notice-warning {
+        background: rgba(209, 58, 58, 0.2);
+        border-left: 3px solid #d13a3a;
+        padding: 0.6rem 1rem;
+        border-radius: 20px;
+        margin: 0.8rem 0;
+        font-size: 0.8rem;
+        color: #ffb8b8;
+    }
+    .notice-btn {
+        background: #d4af37;
+        border: none;
+        padding: 0.5rem 1.8rem;
+        border-radius: 40px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #1a1a2e;
+        cursor: pointer;
+        margin-top: 0.8rem;
+        transition: 0.2s;
+    }
+    .notice-btn:hover {
+        background: #ffdd77;
+        transform: scale(1.01);
+    }
+    .tiny-close {
+        margin-top: 0.8rem;
+        font-size: 0.6rem;
+        color: #8e7cb3;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    @keyframes fadeInScale {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+</style>
 </head>
 <body>
-
+<!-- 公告弹窗 -->
+<div id="noticeModal" class="notice-modal">
+    <div class="notice-card">
+        <h3>公告</h3>
+        <div class="notice-date">2026.06.10</div>
+        <div class="notice-content">
+            <li>地图点灯功能正在重构中</li>
+            <li>「手动点亮城市」功能即将开放，敬请期待</li>
+            <li>切换城市功能已上线，可自由查看各地天气</li>
+            <li>留言墙、灯愿池、私密信均云端保存</li>
+        </div>
+        <div class="notice-warning">
+            ⚡ 地图点灯尚未完全完工，部分功能正在测试中，可能会有不稳定的情况，敬请谅解 ⚡
+        </div>
+        <button class="notice-btn" id="closeNoticeBtn">我知道了 </button>
+        <div class="tiny-close" id="closeNoticeLink">不再显示</div>
+    </div>
+</div>
 <nav class="navbar">
     <div class="nav-container">
         <div class="nav-logo"><i class="fas fa-fox"></i> 灯火集</div>
@@ -367,6 +536,7 @@
         <div class="weather-temp" id="weatherTemp">--°C</div>
         <div class="weather-desc" id="weatherDesc">灯火常明</div>
         <div class="weather-update" id="weatherUpdate">✨ 灯火随天候而变</div>
+        <div class="city-switch" id="citySwitchBtn">📍 切换城市</div>
     </div>
 
     <div class="msg-wall">
@@ -415,18 +585,32 @@
     </div>
 </div>
 
+<div id="cityModal" class="city-modal">
+    <div class="city-modal-content">
+        <h3 style="color:#d4af37;">🏮 切换城市</h3>
+        <input type="text" id="cityInput" placeholder="输入城市名，如：济源、北京、上海">
+        <div>
+            <button id="confirmCityBtn">确认</button>
+            <button id="cancelCityBtn">取消</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // Supabase 配置
 const SUPABASE_URL = 'https://ziuzlbyepdcalmjfwbyz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_DONsSE_XcQQPTyLzTLaKtQ_p2CX8Gxd';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const GAODE_KEY = '0e974801b69df813740c13180b534056';
 
 let currentUser = null;
 let currentLetters = [];
 let currentLetterIndex = null;
+let map = null;
+let markers = [];
+let currentCity = null;
 
-// 匿名登录
 async function anonymousLogin() {
     try {
         const { data, error } = await supabaseClient.auth.signInAnonymously();
@@ -445,7 +629,6 @@ function getRandomName() {
     return namePrefix[Math.floor(Math.random() * namePrefix.length)];
 }
 
-// 留言
 async function loadMessages() {
     const { data, error } = await supabaseClient.from('messages').select('*').order('time', { ascending: false });
     if (error) { console.error(error); return; }
@@ -465,7 +648,6 @@ async function sendMessage(content) {
     await loadMessages();
 }
 
-// 心愿
 async function loadWishes() {
     const { data, error } = await supabaseClient.from('wishes').select('*').order('time', { ascending: false });
     if (error) { console.error(error); return; }
@@ -485,7 +667,6 @@ async function sendWish(content) {
     await loadWishes();
 }
 
-// 信件
 async function loadMyLetters() {
     if (!currentUser) return;
     const { data, error } = await supabaseClient.from('letters').select('*').eq('user_id', currentUser.id).order('time', { ascending: false });
@@ -541,21 +722,20 @@ function closeModal() {
     currentLetterIndex = null;
 }
 
-// 天气（已修正济源显示）
-async function initWeather() {
+function getSavedCity() {
+    return localStorage.getItem('manual_city') || null;
+}
+
+function saveCity(city) {
+    localStorage.setItem('manual_city', city);
+}
+
+async function updateWeather(city) {
     try {
-        const res = await fetch('https://api.ip.sb/geoip');
-        const data = await res.json();
-        let city = data.city || '灯火城';
-        
-        // 修正济源显示（IP 被识别成平顶山时手动改回来）
-        if (city === '平顶山') city = '济源';
-        
         const weatherRes = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
         const weatherData = await weatherRes.json();
         const temp = weatherData.current_condition[0].temp_C;
         const condition = weatherData.current_condition[0].weatherDesc[0].value.toLowerCase();
-        
         let type = '晴';
         if (condition.includes('rain')) type = '中雨';
         else if (condition.includes('snow')) type = '小雪';
@@ -563,7 +743,6 @@ async function initWeather() {
         else if (condition.includes('fog')) type = '雾';
         else if (condition.includes('cloud')) type = '多云';
         else if (condition.includes('overcast')) type = '阴';
-        
         const cfg = {
             '晴': { icon: '☀️', desc: '记得晒晒被子🌞' },
             '中雨': { icon: '🌧️', desc: '雨声助眠💤' },
@@ -573,22 +752,16 @@ async function initWeather() {
             '多云': { icon: '⛅', desc: '云朵在偷懒☁️' },
             '阴': { icon: '☁️', desc: '适合窝着看书📖' }
         }[type] || { icon: '☀️', desc: '记得晒晒被子🌞' };
-        
         document.getElementById('weatherIcon').innerHTML = cfg.icon;
         document.getElementById('weatherCity').innerHTML = city;
         document.getElementById('weatherTemp').innerHTML = `${temp}°C`;
         document.getElementById('weatherDesc').innerHTML = cfg.desc;
+        return true;
     } catch(e) {
         console.warn('天气获取失败', e);
-        document.getElementById('weatherCity').innerHTML = '灯火城';
-        document.getElementById('weatherTemp').innerHTML = '--°C';
-        document.getElementById('weatherDesc').innerHTML = '灯火常明';
+        return false;
     }
 }
-
-// 地图
-let map = null;
-let markers = [];
 
 function initMap() {
     map = new AMap.Map('map', {
@@ -602,19 +775,139 @@ function initMap() {
 
 async function loadMapMarkers() {
     if (!map) return;
-    markers.forEach(m => m.setMap(null));
+    markers.forEach(m => {
+        if (m.circle) m.circle.setMap(null);
+    });
     markers = [];
     const { data } = await supabaseClient.from('lit_cities').select('city, lng, lat, count').not('lng', 'is', null).not('lat', 'is', null);
     if (!data) return;
-    data.forEach(city => {
-        const marker = new AMap.Marker({
-            position: [city.lng, city.lat],
-            label: { content: `🏮 ${city.city} ${city.count}`, offset: new AMap.Pixel(0, -20) },
+    const cityMap = new Map();
+    data.forEach(c => {
+        if (cityMap.has(c.city)) {
+            cityMap.get(c.city).count += c.count;
+        } else {
+            cityMap.set(c.city, { lng: c.lng, lat: c.lat, count: c.count });
+        }
+    });
+    for (let [city, info] of cityMap.entries()) {
+        const circle = new AMap.Circle({
+            center: [info.lng, info.lat],
+            radius: 8000,
+            fillColor: '#aa66ff',
+            fillOpacity: 0.4,
+            strokeColor: 'transparent',
             map: map
         });
-        markers.push(marker);
-    });
+        markers.push({ circle, city, count: info.count });
+    }
+    updateMarquee(data);
 }
+
+async function lightCity(city, lng, lat) {
+    if (!city) return;
+    const { data: existing } = await supabaseClient
+        .from('lit_cities')
+        .select('id, count')
+        .eq('city', city)
+        .maybeSingle();
+    if (existing) {
+        await supabaseClient
+            .from('lit_cities')
+            .update({ count: existing.count + 1, updated_at: new Date() })
+            .eq('id', existing.id);
+    } else {
+        await supabaseClient
+            .from('lit_cities')
+            .insert({ city: city, lng: lng, lat: lat, count: 1 });
+    }
+    loadMapMarkers();
+}
+
+function updateMarquee(cities) {
+    let marqueeDiv = document.getElementById('city-marquee');
+    if (!marqueeDiv) {
+        marqueeDiv = document.createElement('div');
+        marqueeDiv.id = 'city-marquee';
+        marqueeDiv.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            color: #f0e6ff;
+            padding: 8px 0;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            z-index: 100;
+            border-top: 1px solid #d4af37;
+            border-bottom: 1px solid #d4af37;
+        `;
+        document.body.appendChild(marqueeDiv);
+    }
+    const cityMap = new Map();
+    cities.forEach(c => {
+        cityMap.set(c.city, (cityMap.get(c.city) || 0) + c.count);
+    });
+    const marqueeText = Array.from(cityMap.entries())
+        .map(([city, count]) => `${city} · 已点亮 ${count} 盏灯`)
+        .join('   🏮   ');
+    marqueeDiv.innerHTML = `<div style="display: inline-block; animation: marqueeScroll 40s linear infinite;">${marqueeText}</div>`;
+    if (!document.querySelector('#marquee-style')) {
+        const style = document.createElement('style');
+        style.id = 'marquee-style';
+        style.textContent = `@keyframes marqueeScroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }`;
+        document.head.appendChild(style);
+    }
+}
+
+async function initWeather() {
+    const saved = getSavedCity();
+    if (saved) {
+        currentCity = saved;
+        await updateWeather(saved);
+    } else {
+        try {
+            const ipRes = await fetch(`https://restapi.amap.com/v3/ip?key=${GAODE_KEY}`);
+            const ipData = await ipRes.json();
+            let city = ipData.city || ipData.province || '济源';
+            if (city === '[]') city = ipData.province || '济源';
+            if (city === '平顶山') city = '济源';
+            currentCity = city;
+            await updateWeather(city);
+        } catch(e) {
+            currentCity = '济源';
+            await updateWeather('济源');
+        }
+    }
+}
+
+const cityModal = document.getElementById('cityModal');
+const cityInput = document.getElementById('cityInput');
+const confirmCityBtn = document.getElementById('confirmCityBtn');
+const cancelCityBtn = document.getElementById('cancelCityBtn');
+const citySwitchBtn = document.getElementById('citySwitchBtn');
+
+citySwitchBtn.addEventListener('click', () => { cityModal.style.display = 'flex'; });
+cancelCityBtn.addEventListener('click', () => { cityModal.style.display = 'none'; });
+confirmCityBtn.addEventListener('click', async () => {
+    const newCity = cityInput.value.trim();
+    if (!newCity) return;
+    const geoRes = await fetch(`https://restapi.amap.com/v3/geocode/geo?key=${GAODE_KEY}&address=${encodeURIComponent(newCity)}`);
+    const geoData = await geoRes.json();
+    if (geoData.status === '1' && geoData.geocodes && geoData.geocodes.length > 0) {
+        const loc = geoData.geocodes[0].location.split(',');
+        const lng = parseFloat(loc[0]);
+        const lat = parseFloat(loc[1]);
+        await lightCity(newCity, lng, lat);
+    }
+    saveCity(newCity);
+    currentCity = newCity;
+    await updateWeather(newCity);
+    cityModal.style.display = 'none';
+    cityInput.value = '';
+});
 
 function formatTime(ts) {
     const d = new Date(ts);
@@ -624,6 +917,99 @@ function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
 }
+
+let weatherAnimationId = null, weatherCtx = null, weatherCanvas = null, weatherParticles = [], currentWeatherEffect = 'none';
+const weatherConfig = {
+    '晴': { icon: '☀️', desc: '记得晒晒被子🌞' }, '晴夜': { icon: '🌙', desc: '今夜月色真美🌙' },
+    '多云': { icon: '⛅', desc: '云朵在偷懒☁️' }, '阴': { icon: '☁️', desc: '适合窝着看书📖' },
+    '小雨': { icon: '🌦️', desc: '出门记得带伞☔', effect: 'light_rain' }, '中雨': { icon: '🌧️', desc: '雨声助眠💤', effect: 'medium_rain' },
+    '大雨': { icon: '🌧️💧', desc: '少出门，多喝茶🍵', effect: 'heavy_rain' }, '暴雨': { icon: '⛈️💧', desc: '注意安全🌊', effect: 'storm_rain' },
+    '小雪': { icon: '🌨️', desc: '加件毛衣🧣', effect: 'light_snow' }, '中雪': { icon: '❄️❄️', desc: '小心路滑⚠️', effect: 'medium_snow' },
+    '大雪': { icon: '❄️❄️❄️', desc: '堆雪人吧⛄', effect: 'heavy_snow' }, '雾': { icon: '🌫️', desc: '慢一点，安全第一🚗' },
+    '雷阵雨': { icon: '⛈️', desc: '关好窗⚡', effect: 'thunderstorm' }, '雷暴': { icon: '🌩️⚡', desc: '拔掉电器插头🔌', effect: 'thunderstorm' }
+};
+
+function startWeatherEffect(effect) {
+    stopWeatherEffect();
+    currentWeatherEffect = effect;
+    const card = document.getElementById('weatherCard');
+    weatherCanvas = document.getElementById('weatherCanvas');
+    if (!weatherCanvas) return;
+    const rect = card.getBoundingClientRect();
+    weatherCanvas.width = rect.width;
+    weatherCanvas.height = rect.height;
+    if (effect.includes('rain')) startRainEffect(effect);
+    if (effect.includes('snow')) startSnowEffect(effect);
+    if (effect === 'thunderstorm') { startRainEffect('heavy_rain'); startLightning(); }
+}
+function startRainEffect(effect) {
+    let count = effect === 'light_rain' ? 80 : effect === 'medium_rain' ? 150 : 220;
+    weatherCtx = weatherCanvas.getContext('2d');
+    weatherParticles = [];
+    for (let i = 0; i < count; i++) weatherParticles.push({ x: Math.random() * weatherCanvas.width, y: Math.random() * weatherCanvas.height, length: 8 + Math.random() * 15, speed: 6 + Math.random() * 12 });
+    function draw() {
+        if (!weatherCtx || !weatherCanvas || !currentWeatherEffect.includes('rain')) return;
+        weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+        for (let p of weatherParticles) {
+            weatherCtx.beginPath();
+            weatherCtx.moveTo(p.x, p.y);
+            weatherCtx.lineTo(p.x - 2, p.y + p.length);
+            weatherCtx.strokeStyle = 'rgba(180, 210, 240, 0.5)';
+            weatherCtx.stroke();
+            p.y += p.speed;
+            if (p.y > weatherCanvas.height) { p.y = -p.length; p.x = Math.random() * weatherCanvas.width; }
+        }
+        weatherAnimationId = requestAnimationFrame(draw);
+    }
+    draw();
+}
+function startSnowEffect(effect) {
+    let count = effect === 'light_snow' ? 60 : effect === 'medium_snow' ? 100 : 150;
+    weatherCtx = weatherCanvas.getContext('2d');
+    weatherParticles = [];
+    for (let i = 0; i < count; i++) weatherParticles.push({ x: Math.random() * weatherCanvas.width, y: Math.random() * weatherCanvas.height, radius: 2 + Math.random() * 4, speed: 1 + Math.random() * 3 });
+    function draw() {
+        if (!weatherCtx || !weatherCanvas || !currentWeatherEffect.includes('snow')) return;
+        weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+        for (let p of weatherParticles) {
+            weatherCtx.beginPath();
+            weatherCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            weatherCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            weatherCtx.fill();
+            p.y += p.speed;
+            if (p.y > weatherCanvas.height) { p.y = -p.radius; p.x = Math.random() * weatherCanvas.width; }
+        }
+        weatherAnimationId = requestAnimationFrame(draw);
+    }
+    draw();
+}
+let lightningTimeout = null;
+function startLightning() {
+    const flash = document.getElementById('lightningFlash');
+    function schedule() {
+        if (currentWeatherEffect !== 'thunderstorm') return;
+        lightningTimeout = setTimeout(() => {
+            flash.style.background = 'rgba(255, 255, 200, 0.8)';
+            setTimeout(() => flash.style.background = 'transparent', 100);
+            schedule();
+        }, 4000 + Math.random() * 4000);
+    }
+    schedule();
+}
+function stopWeatherEffect() {
+    if (weatherAnimationId) cancelAnimationFrame(weatherAnimationId);
+    if (lightningTimeout) clearTimeout(lightningTimeout);
+    if (weatherCtx && weatherCanvas) weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+    const flash = document.getElementById('lightningFlash');
+    if (flash) flash.style.background = 'transparent';
+}
+window.addEventListener('resize', () => {
+    if (weatherCanvas && currentWeatherEffect !== 'none') {
+        const rect = document.getElementById('weatherCard').getBoundingClientRect();
+        weatherCanvas.width = rect.width;
+        weatherCanvas.height = rect.height;
+    }
+});
 
 document.getElementById('sendMsgBtn')?.addEventListener('click', async () => {
     const input = document.getElementById('msgInput');
@@ -642,8 +1028,24 @@ document.getElementById('modalDeleteBtn')?.addEventListener('click', async () =>
 });
 document.getElementById('letterModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('letterModal')) closeModal(); });
 document.getElementById('navToggle')?.addEventListener('click', () => document.querySelector('.nav-menu')?.classList.toggle('active'));
-
+// 公告弹窗逻辑（只弹出一次）
+function initNotice() {
+    const hasSeen = localStorage.getItem('notice_seen_v2');
+    if (hasSeen) return;
+    const modal = document.getElementById('noticeModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    const closeBtn = document.getElementById('closeNoticeBtn');
+    const closeLink = document.getElementById('closeNoticeLink');
+    const closeModal = () => {
+        modal.style.display = 'none';
+        localStorage.setItem('notice_seen_v2', 'true');
+    };
+    closeBtn?.addEventListener('click', closeModal);
+    closeLink?.addEventListener('click', closeModal);
+}
 async function init() {
+    initNotice();      
     await anonymousLogin();
     await loadMessages();
     await loadWishes();
