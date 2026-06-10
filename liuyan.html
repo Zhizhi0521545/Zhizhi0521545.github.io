@@ -571,9 +571,10 @@ function closeModal() {
 // ========== 点灯记录城市（自动存坐标） ==========
 async function recordCityLight() {
     try {
-        const geoRes = await fetch('https://api.ip.sb/geoip');
-        const geoData = await geoRes.json();
-        let cityName = geoData.city || '灯火城';
+        const geoRes = await fetch(`https://restapi.amap.com/v3/ip?key=0e974801b69df813740c13180b534056`);
+const geoData = await geoRes.json();
+let cityName = geoData.city || geoData.province || '灯火城';
+if (cityName === '[]') cityName = geoData.province || '灯火城';
         if (!cityName || cityName === '') cityName = '灯火城';
         
         const geocodeUrl = `https://restapi.amap.com/v3/geocode/geo?key=0e974801b69df813740c13180b534056&address=${encodeURIComponent(cityName)}&output=JSON`;
@@ -696,9 +697,10 @@ const weatherConfig = {
 };
 async function initWeather() {
     try {
-        const geoRes = await fetch('https://api.ip.sb/geoip');
-        const geoData = await geoRes.json();
-        let city = geoData.city || '灯火城';
+        const geoRes = await fetch(`https://restapi.amap.com/v3/ip?key=0e974801b69df813740c13180b534056`);
+const geoData = await geoRes.json();
+let city = geoData.city || geoData.province || '灯火城';
+if (city === '[]') city = geoData.province || '灯火城';
         const weatherRes = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
         const weatherData = await weatherRes.json();
         const temp = weatherData.current_condition[0].temp_C;
