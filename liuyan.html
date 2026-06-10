@@ -425,12 +425,12 @@ async function anonymousLogin() {
 
 // 留言
 async function loadMessages() {
+    if (!supabaseClient) return;
     const { data, error } = await supabaseClient
         .from('messages')
         .select('*')
-        .order('time', { ascending: false })
-        .limit(50);
-    if (error) { console.error('加载留言失败', error); return; }
+        .order('time', { ascending: false });  // 去掉 limit，显示全部
+    if (error) { console.error(error); return; }
     const container = document.getElementById('messageList');
     if (!container) return;
     container.innerHTML = data.map(m => `
@@ -453,12 +453,12 @@ async function sendMessage(content) {
 
 // 心愿
 async function loadWishes() {
+    if (!supabaseClient) return;
     const { data, error } = await supabaseClient
         .from('wishes')
         .select('*')
-        .order('time', { ascending: false })
-        .limit(50);
-    if (error) { console.error('加载心愿失败', error); return; }
+        .order('time', { ascending: false });
+    if (error) { console.error(error); return; }
     const container = document.getElementById('wishList');
     if (!container) return;
     container.innerHTML = data.map(w => `
