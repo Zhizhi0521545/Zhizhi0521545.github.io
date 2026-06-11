@@ -412,13 +412,13 @@
     }
     .notice-card h3 {
         font-size: 1.6rem;
-        color: #d4af37;
+        color: #f2f3f3;
         margin-bottom: 0.5rem;
         font-family: '华文楷书', 'KaiTi', serif;
     }
     .notice-date {
         font-size: 0.7rem;
-        color: #b8a0d0;
+        color: #c1a4de;
         margin-bottom: 1rem;
         letter-spacing: 1px;
     }
@@ -430,22 +430,24 @@
         margin: 1rem 0;
         padding: 0 0.5rem;
     }
-    .notice-content li {
-        margin: 0.5rem 0;
-        list-style: none;
-        padding-left: 1.2rem;
-        position: relative;
-    }
+   .notice-content li {
+    margin: 0.5rem 0;
+    list-style: disc;   /* 改回默认圆点 */
+    padding-left: 0.5rem;
+}
+.notice-content li::before {
+    content: none;      /* 移除自定义内容 */
+}
     .notice-content li::before {
-        content: "#";
+        content: "";
         position: absolute;
         left: -0.2rem;
         top: 0;
         font-size: 0.8rem;
     }
     .notice-warning {
-        background: rgba(209, 58, 58, 0.2);
-        border-left: 3px solid #d13a3a;
+        background: rgba(213, 159, 159, 0.2);
+        border-left: 3px solid #c081de;
         padding: 0.6rem 1rem;
         border-radius: 20px;
         margin: 0.8rem 0;
@@ -823,44 +825,44 @@ async function lightCity(city, lng, lat) {
     loadMapMarkers();
 }
 
-function updateMarquee(cities) {
-    let marqueeDiv = document.getElementById('city-marquee');
-    if (!marqueeDiv) {
-        marqueeDiv = document.createElement('div');
-        marqueeDiv.id = 'city-marquee';
-        marqueeDiv.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px);
-            color: #f0e6ff;
-            padding: 8px 0;
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            z-index: 100;
-            border-top: 1px solid #d4af37;
-            border-bottom: 1px solid #d4af37;
-        `;
-        document.body.appendChild(marqueeDiv);
-    }
-    const cityMap = new Map();
-    cities.forEach(c => {
-        cityMap.set(c.city, (cityMap.get(c.city) || 0) + c.count);
-    });
-    const marqueeText = Array.from(cityMap.entries())
-        .map(([city, count]) => `${city} · 已点亮 ${count} 盏灯`)
-        .join('   🏮   ');
-    marqueeDiv.innerHTML = `<div style="display: inline-block; animation: marqueeScroll 40s linear infinite;">${marqueeText}</div>`;
-    if (!document.querySelector('#marquee-style')) {
-        const style = document.createElement('style');
-        style.id = 'marquee-style';
-        style.textContent = `@keyframes marqueeScroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }`;
-        document.head.appendChild(style);
-    }
-}
+// function updateMarquee(cities) {
+//     let marqueeDiv = document.getElementById('city-marquee');
+//     if (!marqueeDiv) {
+//         marqueeDiv = document.createElement('div');
+//         marqueeDiv.id = 'city-marquee';
+//         marqueeDiv.style.cssText = `
+//             position: fixed;
+//             bottom: 20px;
+//             left: 0;
+//             width: 100%;
+//             background: rgba(0,0,0,0.7);
+//             backdrop-filter: blur(8px);
+//             color: #f0e6ff;
+//             padding: 8px 0;
+//             font-size: 14px;
+//             white-space: nowrap;
+//             overflow: hidden;
+//             z-index: 100;
+//             border-top: 1px solid #d4af37;
+//             border-bottom: 1px solid #d4af37;
+//         `;
+//         document.body.appendChild(marqueeDiv);
+//     }
+//     const cityMap = new Map();
+//     cities.forEach(c => {
+//         cityMap.set(c.city, (cityMap.get(c.city) || 0) + c.count);
+//     });
+//     const marqueeText = Array.from(cityMap.entries())
+//         .map(([city, count]) => `${city} · 已点亮 ${count} 盏灯`)
+//         .join('   🏮   ');
+//     marqueeDiv.innerHTML = `<div style="display: inline-block; animation: marqueeScroll 40s linear infinite;">${marqueeText}</div>`;
+//     if (!document.querySelector('#marquee-style')) {
+//         const style = document.createElement('style');
+//         style.id = 'marquee-style';
+//         style.textContent = `@keyframes marqueeScroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }`;
+//         document.head.appendChild(style);
+//     }
+// }
 
 async function initWeather() {
     const saved = getSavedCity();
@@ -1028,21 +1030,32 @@ document.getElementById('modalDeleteBtn')?.addEventListener('click', async () =>
 });
 document.getElementById('letterModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('letterModal')) closeModal(); });
 document.getElementById('navToggle')?.addEventListener('click', () => document.querySelector('.nav-menu')?.classList.toggle('active'));
-// 公告弹窗逻辑（只弹出一次）
 function initNotice() {
-    const hasSeen = localStorage.getItem('notice_seen_v2');
-    if (hasSeen) return;
+    // 删除或注释掉这段检查代码
+    // const hasSeen = localStorage.getItem('notice_seen_v2');
+    // if (hasSeen) return;
+    
     const modal = document.getElementById('noticeModal');
     if (!modal) return;
+    
     modal.style.display = 'flex';
-    const closeBtn = document.getElementById('closeNoticeBtn');
-    const closeLink = document.getElementById('closeNoticeLink');
+    
     const closeModal = () => {
         modal.style.display = 'none';
-        localStorage.setItem('notice_seen_v2', 'true');
+        // 删除这行，不再保存已读状态
+        // localStorage.setItem('notice_seen_v2', 'true');
     };
+    
+    const closeBtn = document.getElementById('closeNoticeBtn');
+    const closeLink = document.getElementById('closeNoticeLink');
+    
     closeBtn?.addEventListener('click', closeModal);
     closeLink?.addEventListener('click', closeModal);
+    
+    // 可选：点击遮罩层也关闭
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
 }
 async function init() {
     initNotice();      
