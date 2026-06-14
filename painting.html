@@ -87,7 +87,6 @@
             backdrop-filter: blur(8px);
             border-radius: 24px;
             overflow: hidden;
-            cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(150, 110, 200, 0.4);
@@ -266,6 +265,50 @@
                 padding: 0 1rem;
             }
         }
+        /* 图片预览弹窗样式 */
+        .image-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            cursor: pointer;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-preview-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            cursor: default;
+        }
+
+        .image-preview-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-preview-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            font-size: 35px;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .image-preview-close:hover {
+            color: #c58aff;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -312,76 +355,158 @@
         <i class="fas fa-music"></i>
     </div>
 
+    <!-- 图片预览弹窗 -->
+    <div id="imagePreviewModal" class="image-preview-modal" onclick="closeImagePreview()">
+        <div class="image-preview-content" onclick="event.stopPropagation()">
+            <span class="image-preview-close" onclick="closeImagePreview()">&times;</span>
+            <img id="previewImage" src="" alt="预览大图">
+        </div>
+    </div>
+
     <script>
-       const paintings = [
-    {
-        url: "image/shoulu3.jpg",
-        title: "梅元知 · 新造型",
-        author: "抖音：一砚清秋",
-        link: "https://v.douyin.com/XKJUA--i16E/"
-    },
-    {
-        url: "image/shoulu1.jpg",
-        title: "凑七合成神尊",
-        author: "抖音：多愁公子剑",
-        link: "https://v.douyin.com/3u0PU3djask/"
-    },
-    {
-        url: "image/shoulu2.jpg",
-        title: "穿一下灯灯的衣服",
-        author: "抖音：多愁公子剑",
-        link: "https://v.douyin.com/Uwd870TPQZo/"
-    },
-    {
-        url: "zhiyuyi.jpg",
-        title: "你问西湖水 偷走他的几分美",
-        author: "小红书：知雨意",
-        link: "http://xhslink.com/o/6vwfDDyMiEU"
-    },
-    {
-        url: "jianwei.jpg",
-        title: "明年我们的相遇是在电影院",
-        author: "LOFTER：简惟· AI生成",
-        link: "https://xinjinjumin722881580653.lofter.com/post/89723a34_34cca586c?incantation=rzEwlk3Q2yqm"
-    },
-     {
-        url: "jianwei2.jpg",
-        title: "明年我们的相遇是在电影院",
-        author: "LOFTER：简惟",
-        link: "https://xinjinjumin722881580653.lofter.com/post/89723a34_34cca586c?incantation=rzEwlk3Q2yqm"
-    },
-     {
-        url: "suisi3.jpg",  
-        title: "二拜天地x梅元知 · 不怕人间妖魔当道，万般皆是苦",
-        author: "小红书：岁司",
-        link: "http://xhslink.com/o/6tsDZnxy8e"
-    },
-    {
-        url: "suisi1.jpg",  // 请替换为实际下载的图片文件名
-        title: "一枝梅 · 银铃响过 原是故人来",
-        author: "小红书：岁司",  
-        link: "http://xhslink.com/o/3gojrp6hQh4"
-    },
-    { url: "image/gf9.jpg", title: "剑光凝霜", author: "沧元图动漫", link: "#" }
-];
+        const paintings = [
+            {
+                url: "image/shoulu3.jpg",
+                title: "梅元知 · 新造型",
+                author: "抖音：一砚清秋",
+                link: "https://v.douyin.com/XKJUA--i16E/"
+            },
+            {
+                url: "image/shoulu1.jpg",
+                title: "凑七合成神尊",
+                author: "抖音：多愁公子剑",
+                link: "https://v.douyin.com/3u0PU3djask/"
+            },
+            {
+                url: "image/shoulu2.jpg",
+                title: "穿一下灯灯的衣服",
+                author: "抖音：多愁公子剑",
+                link: "https://v.douyin.com/Uwd870TPQZo/"
+            },
+            {
+                url: "zhiyuyi.jpg",
+                title: "你问西湖水 偷走他的几分美 · 知雨意",
+                author: "小红书：知雨意",
+                link: "http://xhslink.com/o/6vwfDDyMiEU"
+            },
+            {
+                url: "jianwei.jpg",
+                title: "明年我们的相遇是在电影院 · 简惟",
+                author: "LOFTER：简惟· AI生成",
+                link: "https://xinjinjumin722881580653.lofter.com/post/89723a34_34cca586c?incantation=rzEwlk3Q2yqm"
+            },
+            {
+                url: "jianwei2.jpg",
+                title: "明年我们的相遇是在电影院 · 简惟",
+                author: "LOFTER：简惟",
+                link: "https://xinjinjumin722881580653.lofter.com/post/89723a34_34cca586c?incantation=rzEwlk3Q2yqm"
+            },
+            {
+                url: "suisi3.jpg",  
+                title: "二拜天地x梅元知 · 不怕人间妖魔当道，万般皆是苦",
+                author: "小红书：岁司",
+                link: "http://xhslink.com/o/6tsDZnxy8e"
+            },
+            {
+                url: "suisi1.jpg",
+                title: "一枝梅 · 银铃响过 原是故人来",
+                author: "小红书：岁司",
+                link: "http://xhslink.com/o/3gojrp6hQh4"
+            },
+            {
+                url: "yin.jpg",
+                title: "元知啥时候复活",
+                author: "微博：yin",
+                special: true,
+                originalUrl: "yin.jpg",
+                link: "#"  
+            },
+            { 
+                url: "image/gf9.jpg", 
+                title: "剑光凝霜", 
+                author: "沧元图动漫", 
+                link: "#" 
+            }
+        ];
 
         function renderPaintings() {
             const grid = document.getElementById('paintingGrid');
-            grid.innerHTML = paintings.map(p => `
-                <div class="painting-card" onclick="window.open('${p.link}', '_blank')">
-                    <img class="painting-img" src="${p.url}" alt="${p.title}" loading="lazy"
-                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'200\\' viewBox=\\'0 0 300 200\\'%3E%3Crect width=\\'300\\' height=\\'200\\' fill=\\'%232a1a3e\\'/%3E%3Ctext x=\\'150\\' y=\\'100\\' text-anchor=\\'middle\\' dy=\\'.3em\\' fill=\\'%239980b3\\'%3E🎨 图片加载中%3C/text%3E%3C/svg%3E'">
-                    <div class="painting-info">
-                        <h3>${p.title}</h3>
-                        <div class="painting-author">
-                            <span> ${p.author}</span>
-                            <span>🔗 查看详情 →</span>
+            if (!grid) return;
+            
+            grid.innerHTML = paintings.map(p => {
+                const isSpecial = p.special === true;
+                const linkText = isSpecial ? '查看大图' : '查看详情';
+                const fullImageUrl = p.originalUrl || p.url;
+                
+                // 普通卡片：点击整张卡片跳转 link
+                // 特殊卡片：点击整张卡片不跳转，只有点"查看大图"才弹窗
+                let cardOnClick = '';
+                let linkOnClick = '';
+                
+                if (isSpecial) {
+                    // 特殊卡片：整张卡片不跳转，只有链接弹大图
+                    cardOnClick = '';
+                    linkOnClick = `onclick="event.stopPropagation(); showImagePreview('${fullImageUrl}')"`;
+                } else {
+                    // 普通卡片：整张卡片跳转链接
+                    cardOnClick = `onclick="window.open('${p.link || '#'}', '_blank')"`;
+                    linkOnClick = `onclick="event.stopPropagation(); window.open('${p.link || '#'}', '_blank')"`;
+                }
+                
+                return `
+                    <div class="painting-card" ${cardOnClick}>
+                        <img class="painting-img" src="${p.url}" alt="${p.title}" loading="lazy"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'200\\' viewBox=\\'0 0 300 200\\'%3E%3Crect width=\\'300\\' height=\\'200\\' fill=\\'%232a1a3e\\'/%3E%3Ctext x=\\'150\\' y=\\'100\\' text-anchor=\\'middle\\' dy=\\'.3em\\' fill=\\'%239980b3\\'%3E🎨 图片加载中%3C/text%3E%3C/svg%3E'">
+                        <div class="painting-info">
+                            <h3>${escapeHtml(p.title)}</h3>
+                            <div class="painting-author">
+                                <span>${escapeHtml(p.author)}</span>
+                                <span class="view-link" style="cursor: pointer; color: #e2caff;" ${linkOnClick}>
+                                    🔗 ${linkText} →
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
+        // 辅助函数：防止XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // 图片预览弹窗函数
+        function showImagePreview(imageUrl) {
+            const modal = document.getElementById('imagePreviewModal');
+            const previewImg = document.getElementById('previewImage');
+            if (!modal || !previewImg) return;
+            
+            previewImg.src = imageUrl;
+            modal.style.display = 'flex';
+        }
+
+        function closeImagePreview() {
+            const modal = document.getElementById('imagePreviewModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 点击 ESC 键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeImagePreview();
+            }
+        });
+
+        // 初始化渲染
         renderPaintings();
     </script>
 </body>

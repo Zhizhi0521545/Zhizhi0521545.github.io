@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
@@ -280,10 +281,12 @@
                 top: 70px;
                 left: 12px;
             }
+
             .btn-return {
                 padding: 8px 16px;
                 font-size: 0.8rem;
             }
+
             .page-header h1 {
                 font-size: 1.5rem;
             }
@@ -293,6 +296,7 @@
             .nav-toggle {
                 display: block;
             }
+
             .nav-menu {
                 position: fixed;
                 top: 55px;
@@ -305,155 +309,169 @@
                 padding: 1rem 0;
                 transition: left 0.3s ease;
             }
+
             .nav-menu.active {
                 left: 0;
             }
+
             .nav-item {
                 width: 100%;
                 text-align: center;
             }
+
             .nav-link {
                 padding: 0.6rem;
                 display: inline-block;
             }
+
             .container {
                 padding: 80px 1rem 2rem;
             }
+
             .video-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
+
 <body>
 
-<!-- 固定在左上角的返回按钮 -->
-<div class="fixed-return">
-    <a href="tongren.html" class="btn-return">
-        <i class="fas fa-arrow-left"></i> 返回同人衍生
-    </a>
-</div>
-
-<nav class="navbar">
-    <div class="nav-container">
-        <div class="nav-logo"><i class="fas fa-fox"></i> 灯火集</div>
-        <ul class="nav-menu">
-            <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
-            <li class="nav-item"><a href="renwu.html" class="nav-link">人物简介</a></li>
-            <li class="nav-item"><a href="zhanli.html" class="nav-link">战力图鉴</a></li>
-            <li class="nav-item"><a href="guanxi.html" class="nav-link">羁绊关系</a></li>
-            <li class="nav-item"><a href="tongren.html" class="nav-link">同人衍生</a></li>
-            <li class="nav-item"><a href="liuyan.html" class="nav-link">留灯处</a></li>
-            <li class="nav-item"><a href="xinsheng.html" class="nav-link">归途·新生</a></li>
-            <li class="nav-item"><a href="about.html" class="nav-link">关于</a></li>
-        </ul>
-        <div class="nav-toggle" id="navToggle"><i class="fas fa-bars"></i></div>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="page-header">
-        <h1><i class="fas fa-video"></i> 剪辑作品</h1>
-        <p>「每一帧，都是他曾来过的证明」</p>
-        <p style="font-size: 0.7rem; margin-top: 0.5rem;">🎬 点击卡片跳转官方平台观看高清完整版</p>
+    <!-- 固定在左上角的返回按钮 -->
+    <div class="fixed-return">
+        <a href="tongren.html" class="btn-return">
+            <i class="fas fa-arrow-left"></i> 返回同人衍生
+        </a>
     </div>
 
-    <div class="video-grid" id="videoGrid"></div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><i class="fas fa-fox"></i> 灯火集</div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+                <li class="nav-item"><a href="renwu.html" class="nav-link">人物简介</a></li>
+                <li class="nav-item"><a href="zhanli.html" class="nav-link">战力图鉴</a></li>
+                <li class="nav-item"><a href="guanxi.html" class="nav-link">羁绊关系</a></li>
+                <li class="nav-item"><a href="tongren.html" class="nav-link">同人衍生</a></li>
+                <li class="nav-item"><a href="liuyan.html" class="nav-link">留灯处</a></li>
+                <li class="nav-item"><a href="xinsheng.html" class="nav-link">归途·新生</a></li>
+                <li class="nav-item"><a href="about.html" class="nav-link">关于</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle"><i class="fas fa-bars"></i></div>
+        </div>
+    </nav>
 
-    <div class="credit-box">
-        <p>
-            🎬 感谢「沧元图」官方抖音分享精彩片段<br>
-            🎬 感谢抖音博主@心上秋🇨🇳分享精彩片段<br>
-            🎬 感谢抖音博主@susu分享精彩片段<br>
-            🎬 感谢抖音博主@次灰分享精彩片段<br>
-            🎬 感谢抖音博主@一ke耽丹莓分享精彩片段<br>
-            🎬 感谢抖音博主@钰合成分享精彩片段<br>
-            🎬 感谢抖音博主@桃流分享精彩片段<br>
-             点击卡片即可跳转至官方平台观看原视频，版权归原作者所有
-        </p>
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-video"></i> 剪辑作品</h1>
+            <p>「每一帧，都是他曾来过的证明」</p>
+            <p style="font-size: 0.7rem; margin-top: 0.5rem;">🎬 点击卡片跳转官方平台观看高清完整版</p>
+        </div>
+
+        <div class="video-grid" id="videoGrid"></div>
+
+        <div class="credit-box">
+            <p>
+                🎬 感谢「沧元图」官方抖音分享精彩片段<br>
+                🎬 感谢抖音博主@心上秋🇨🇳分享精彩片段<br>
+                🎬 感谢抖音博主@susu分享精彩片段<br>
+                🎬 感谢抖音博主@次灰分享精彩片段<br>
+                🎬 感谢抖音博主@一ke耽丹莓分享精彩片段<br>
+                🎬 感谢抖音博主@钰合成分享精彩片段<br>
+                🎬 感谢抖音博主@桃流分享精彩片段<br>
+                🎬 感谢抖音博主@利尔多隆嘛🐜分享精彩片段<br>
+                点击卡片即可跳转至官方平台观看原视频，版权归原作者所有
+            </p>
+        </div>
     </div>
-</div>
 
-<footer>
-     九尾燃灯 · 宿命不改其志 <br>
-    非商业粉丝站点 · 万家灯火，为君长明
-</footer>
+    <footer>
+        九尾燃灯 · 宿命不改其志 <br>
+        非商业粉丝站点 · 万家灯火，为君长明
+    </footer>
 
-<script>
-    // 视频数据 - 官方抖音视频
-    const videos = [
-        // ===== 官方抖音视频 =====
-        {
-            cover: "image/guanfang1.jpg",
-            title: "终于又见面了，小狐狸是不会消失的",
-            source: "沧元图官方抖音",
-            platform: "抖音",
-            url: "https://v.douyin.com/OuS474l4Byk/"
-        },
-        {
-            cover: "image/guanfang2.jpg",
-            title: "好在花有重开日，人有重逢时",
-            source: "沧元图官方抖音",
-            platform: "抖音",
-            url: "https://v.douyin.com/oCIX6FbFWWE/"
-        },
-        {
-            cover: "image/guanfang3.jpg",
-            title: "欢迎回家！我们的老朋友梅元知！",
-            source: "沧元图官方抖音",
-            platform: "抖音",
-            url: "https://v.douyin.com/PTZUPlvVFoQ/"
-        },
+    <script>
+        // 视频数据 - 官方抖音视频
+        const videos = [
+            // ===== 官方抖音视频 =====
+            {
+                cover: "image/guanfang1.jpg",
+                title: "终于又见面了，小狐狸是不会消失的",
+                source: "沧元图官方抖音",
+                platform: "抖音",
+                url: "https://v.douyin.com/OuS474l4Byk/"
+            },
+            {
+                cover: "image/guanfang2.jpg",
+                title: "好在花有重开日，人有重逢时",
+                source: "沧元图官方抖音",
+                platform: "抖音",
+                url: "https://v.douyin.com/oCIX6FbFWWE/"
+            },
+            {
+                cover: "image/guanfang3.jpg",
+                title: "欢迎回家！我们的老朋友梅元知！",
+                source: "沧元图官方抖音",
+                platform: "抖音",
+                url: "https://v.douyin.com/PTZUPlvVFoQ/"
+            },
 
-        // ===== 授权博主视频 =====
-        {
-            cover: "image/gf17.jpg",
-            title: "梅元知是多少人的意难平",
-            source: "抖音 @心上秋🇨🇳",
-            platform: "抖音",
-            url: "https://v.douyin.com/5jcAgINeXWY/"
-        },
-        {
-            cover: "image/drink.jpg",
-            title: "他不该是这样的结局",
-            source: "抖音 @susu",
-            platform: "抖音",
-            url: "https://v.douyin.com/dvTkjo8Mhk4/"
-        },
-        {
-            cover: "image/guanfang4.jpg",
-            title: "开牌，我要验牌",
-            source: "抖音 @次灰",
-            platform: "抖音",
-            url: "https://v.douyin.com/TB-4JLyhO84/"
-        },
-        {
-            cover: "image/fohuo.jpg",
-            title: "白月光回国，修炼暂停我去接！#梅元知复活",
-            source: "抖音 @一ke耽丹莓",
-            platform: "抖音",
-            url: "https://v.douyin.com/GS1w94xqLGU/"
-        },
-        {
-            cover: "image/tiancai.jpg",
-            title: "百年难一遇的天才，那年的东宁府却...",
-            source: "抖音 @钰合成",
-            platform: "抖音",
-            url: "https://v.douyin.com/_IhMT9VFXRU/"
-        },
-        // ===== 新视频：如何抹去你身影 =====
-        {
-            cover: "image/spfm1.jpg",
-            title: "如何抹去你身影 如同忘却我姓名…",
-            source: "抖音 @桃流",
-            platform: "抖音",
-            url: "https://v.douyin.com/qsTQgonnkVI/"
-        }
-    ];
+            // ===== 授权博主视频 =====
+            {
+                cover: "image/gf17.jpg",
+                title: "梅元知是多少人的意难平",
+                source: "抖音 @心上秋🇨🇳",
+                platform: "抖音",
+                url: "https://v.douyin.com/5jcAgINeXWY/"
+            },
+            {
+                cover: "image/drink.jpg",
+                title: "他不该是这样的结局",
+                source: "抖音 @susu",
+                platform: "抖音",
+                url: "https://v.douyin.com/dvTkjo8Mhk4/"
+            },
+            {
+                cover: "image/guanfang4.jpg",
+                title: "开牌，我要验牌",
+                source: "抖音 @次灰",
+                platform: "抖音",
+                url: "https://v.douyin.com/TB-4JLyhO84/"
+            },
+            {
+                cover: "image/fohuo.jpg",
+                title: "白月光回国，修炼暂停我去接！#梅元知复活",
+                source: "抖音 @一ke耽丹莓",
+                platform: "抖音",
+                url: "https://v.douyin.com/GS1w94xqLGU/"
+            },
+            {
+                cover: "image/tiancai.jpg",
+                title: "百年难一遇的天才，那年的东宁府却...",
+                source: "抖音 @钰合成",
+                platform: "抖音",
+                url: "https://v.douyin.com/_IhMT9VFXRU/"
+            },
+            // ===== 新视频：如何抹去你身影 =====
+            {
+                cover: "image/spfm1.jpg",
+                title: "如何抹去你身影 如同忘却我姓名…",
+                source: "抖音 @桃流",
+                platform: "抖音",
+                url: "https://v.douyin.com/qsTQgonnkVI/"
+            },
+            {
+                cover: "image/maidangdang.jpg",
+                title: "麦当当很不高兴为你服务",
+                source: "抖音：@利尔多隆嘛🐜",
+                platform: "抖音",
+                url: "https://v.douyin.com/KQGwTCOjn5s/"
+            }
+        ];
 
-    function renderVideoGrid() {
-        const grid = document.getElementById('videoGrid');
-        grid.innerHTML = videos.map(video => `
+        function renderVideoGrid() {
+            const grid = document.getElementById('videoGrid');
+            grid.innerHTML = videos.map(video => `
             <div class="video-card" onclick="window.open('${video.url}', '_blank')">
                 <div class="video-cover">
                     <img src="${video.cover}" alt="${video.title}" loading="lazy"
@@ -471,24 +489,25 @@
                 </div>
             </div>
         `).join('');
-    }
+        }
 
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
 
-    // 导航栏
-    const navToggle = document.getElementById('navToggle');
-    const navMenu = document.querySelector('.nav-menu');
-    if (navToggle) {
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-    }
+        // 导航栏
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.querySelector('.nav-menu');
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+            });
+        }
 
-    renderVideoGrid();
-</script>
+        renderVideoGrid();
+    </script>
 </body>
+
 </html>
