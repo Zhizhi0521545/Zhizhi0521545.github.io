@@ -364,110 +364,175 @@
     </div>
 
     <script>
+        // ========== 画作数据 ==========
+        // url: 优先用 .webp（体积小加载快），如果 .webp 不存在则用原后缀
+        // 每个条目都有 .webp 和 .jpg 两种格式，onerror 会自动回退
         const paintings = [
             {
                 url: "image/shoulu3.webp",
+                fallback: "image/shoulu3.jpg",
                 title: "梅元知 · 新造型",
                 author: "抖音：一砚清秋",
                 link: "https://v.douyin.com/XKJUA--i16E/"
             },
             {
                 url: "image/shoulu1.webp",
+                fallback: "image/shoulu1.jpg",
                 title: "凑七合成神尊",
                 author: "抖音：多愁公子剑",
                 link: "https://v.douyin.com/3u0PU3djask/"
             },
             {
                 url: "image/shoulu2.webp",
+                fallback: "image/shoulu2.jpg",
                 title: "穿一下灯灯的衣服",
                 author: "抖音：多愁公子剑",
                 link: "https://v.douyin.com/Uwd870TPQZo/"
             },
             {
                 url: "zhiyuyi.webp",
+                fallback: "zhiyuyi.jpg",
                 title: "你问西湖水 偷走他的几分美 · 知雨意",
                 author: "小红书：知雨意",
                 link: "http://xhslink.com/o/6vwfDDyMiEU"
             },
             {
                 url: "jianwei.webp",
+                fallback: "jianwei.jpg",
                 title: "明年我们的相遇是在电影院 · 简惟",
                 author: "LOFTER：简惟· AI生成",
                 link: "https://xinjinjumin722881580653.lofter.com/post/89723a34_34cca586c?incantation=rzEwlk3Q2yqm"
             },
             {
                 url: "jianwei2.webp",
+                fallback: "jianwei2.jpg",
                 title: "明年我们的相遇是在电影院 · 简惟",
                 author: "LOFTER：简惟",
                 link: "https://xinjinjumin722881580653.lofter.com/post/89723a34_34cca586c?incantation=rzEwlk3Q2yqm"
             },
             {
-                url: "suisi3.webp",  
+                url: "suisi3.webp",
+                fallback: "suisi3.jpg",
                 title: "二拜天地x梅元知 · 不怕人间妖魔当道，万般皆是苦",
                 author: "小红书：岁司",
                 link: "http://xhslink.com/o/6tsDZnxy8e"
             },
             {
                 url: "suisi1.webp",
+                fallback: "suisi1.jpg",
                 title: "一枝梅 · 银铃响过 原是故人来",
                 author: "小红书：岁司",
                 link: "http://xhslink.com/o/3gojrp6hQh4"
             },
             {
-                url: "yin.webp",
+                // yin 只有 .jpg，没有 .webp，所以 url 直接用 jpg，fallback 留空
+                url: "yin.jpg",
+                fallback: null,
                 title: "元知啥时候复活",
                 author: "微博：yin",
                 special: true,
                 originalUrl: "yin.jpg",
-                link: "#"  
+                link: "#"
             },
-            { 
-                url: "image/gf9.webp", 
-                title: "剑光凝霜", 
-                author: "沧元图动漫", 
-                link: "#" 
+            {
+                url: "image/gf9.webp",
+                fallback: "image/gf9.jpg",
+                title: "剑光凝霜",
+                author: "沧元图动漫",
+                link: "#"
             }
         ];
 
+        // ========== SVG 占位图（当所有回退都失败时显示） ==========
+        function getPlaceholder(text) {
+            return 'data:image/svg+xml,' + encodeURIComponent(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">' +
+                '<rect width="320" height="240" fill="#2a1a3e"/>' +
+                '<text x="160" y="115" text-anchor="middle" font-size="14" fill="#9980b3">🎨 ' + text + '</text>' +
+                '<text x="160" y="135" text-anchor="middle" font-size="11" fill="#665580">图片加载失败</text>' +
+                '</svg>'
+            );
+        }
+
+        // ========== 智能回退：webp 失败试 jpg，jpg 失败试 webp ==========
+        function handleImgError(img, fallbackUrl) {
+            var currentSrc = img.getAttribute('src');
+            var failedSrc = img.getAttribute('data-failed') || '';
+            var triedList = failedSrc ? failedSrc.split('|') : [];
+
+            // 记录本次失败的 src
+            triedList.push(currentSrc);
+            img.setAttribute('data-failed', triedList.join('|'));
+
+            // 策略1: 如果指定了 fallback 且还没试过，用 fallback
+            if (fallbackUrl && triedList.indexOf(fallbackUrl) === -1) {
+                img.src = fallbackUrl;
+                return;
+            }
+
+            // 策略2: 自动推断回退 — .webp ↔ .jpg
+            var altSrc = null;
+            var lower = currentSrc.toLowerCase();
+            if (lower.endsWith('.webp')) {
+                altSrc = currentSrc.slice(0, -5) + '.jpg';
+            } else if (lower.endsWith('.jpg')) {
+                altSrc = currentSrc.slice(0, -4) + '.webp';
+            } else if (lower.endsWith('.png')) {
+                altSrc = currentSrc.slice(0, -4) + '.webp';
+            }
+
+            if (altSrc && triedList.indexOf(altSrc) === -1) {
+                img.src = altSrc;
+                return;
+            }
+
+            // 策略3: 所有回退都失败，显示占位图
+            img.onerror = null; // 防止无限循环
+            img.src = getPlaceholder(img.alt || '图片');
+        }
+
         function renderPaintings() {
-            const grid = document.getElementById('paintingGrid');
+            var grid = document.getElementById('paintingGrid');
             if (!grid) return;
-            
-            grid.innerHTML = paintings.map(p => {
-                const isSpecial = p.special === true;
-                const linkText = isSpecial ? '查看大图' : '查看详情';
-                const fullImageUrl = p.originalUrl || p.url;
-                
-                // 普通卡片：点击整张卡片跳转 link
-                // 特殊卡片：点击整张卡片不跳转，只有点"查看大图"才弹窗
-                let cardOnClick = '';
-                let linkOnClick = '';
-                
+
+            grid.innerHTML = paintings.map(function(p) {
+                var isSpecial = p.special === true;
+                var linkText = isSpecial ? '查看大图' : '查看详情';
+                var fullImageUrl = p.originalUrl || p.url;
+
+                // 生成 onerror 属性
+                var fallbackAttr = p.fallback ? ("'" + p.fallback + "'") : 'null';
+                var onerrorFn = "handleImgError(this, " + fallbackAttr + ")";
+
+                var cardOnClick = '';
+                var linkOnClick = '';
+
                 if (isSpecial) {
-                    // 特殊卡片：整张卡片不跳转，只有链接弹大图
                     cardOnClick = '';
-                    linkOnClick = `onclick="event.stopPropagation(); showImagePreview('${fullImageUrl}')"`;
+                    linkOnClick = 'onclick="event.stopPropagation(); showImagePreview(\'' + fullImageUrl + '\')"';
                 } else {
-                    // 普通卡片：整张卡片跳转链接
-                    cardOnClick = `onclick="window.open('${p.link || '#'}', '_blank')"`;
-                    linkOnClick = `onclick="event.stopPropagation(); window.open('${p.link || '#'}', '_blank')"`;
+                    cardOnClick = 'onclick="window.open(\'' + (p.link || '#') + '\', \'_blank\')"';
+                    linkOnClick = 'onclick="event.stopPropagation(); window.open(\'' + (p.link || '#') + '\', \'_blank\')"';
                 }
-                
-                return `
-                    <div class="painting-card" ${cardOnClick}>
-                        <img class="painting-img" src="${p.url}" alt="${p.title}" loading="lazy"
-                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'200\\' viewBox=\\'0 0 300 200\\'%3E%3Crect width=\\'300\\' height=\\'200\\' fill=\\'%232a1a3e\\'/%3E%3Ctext x=\\'150\\' y=\\'100\\' text-anchor=\\'middle\\' dy=\\'.3em\\' fill=\\'%239980b3\\'%3E🎨 图片加载中%3C/text%3E%3C/svg%3E'">
-                        <div class="painting-info">
-                            <h3>${escapeHtml(p.title)}</h3>
-                            <div class="painting-author">
-                                <span>${escapeHtml(p.author)}</span>
-                                <span class="view-link" style="cursor: pointer; color: #e2caff;" ${linkOnClick}>
-                                    🔗 ${linkText} →
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
+
+                return ''
+                    + '<div class="painting-card"' + (cardOnClick ? ' ' + cardOnClick : '') + '>'
+                    +   '<img class="painting-img"'
+                    +     ' src="' + p.url + '"'
+                    +     ' alt="' + escapeHtml(p.title) + '"'
+                    +     ' loading="lazy"'
+                    +     ' onerror="' + onerrorFn + '"'
+                    +   '>'
+                    +   '<div class="painting-info">'
+                    +     '<h3>' + escapeHtml(p.title) + '</h3>'
+                    +     '<div class="painting-author">'
+                    +       '<span>' + escapeHtml(p.author) + '</span>'
+                    +       '<span class="view-link" style="cursor: pointer; color: #e2caff;" ' + linkOnClick + '>'
+                    +         '🔗 ' + linkText + ' →'
+                    +       '</span>'
+                    +     '</div>'
+                    +   '</div>'
+                    + '</div>';
             }).join('');
         }
 
@@ -484,16 +549,15 @@
 
         // 图片预览弹窗函数
         function showImagePreview(imageUrl) {
-            const modal = document.getElementById('imagePreviewModal');
-            const previewImg = document.getElementById('previewImage');
+            var modal = document.getElementById('imagePreviewModal');
+            var previewImg = document.getElementById('previewImage');
             if (!modal || !previewImg) return;
-            
             previewImg.src = imageUrl;
             modal.style.display = 'flex';
         }
 
         function closeImagePreview() {
-            const modal = document.getElementById('imagePreviewModal');
+            var modal = document.getElementById('imagePreviewModal');
             if (modal) {
                 modal.style.display = 'none';
             }
